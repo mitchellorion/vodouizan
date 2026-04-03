@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spirit Oracle Deck — J. Robicheaux</title>
+    <link rel="stylesheet" href="style-v2.css" />
+    <style>
+        .page-hero {
+            position: relative;
+            height: 38vh;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        .page-hero-bg {
+            position: absolute;
+            inset: 0;
+            background: url('backgrounds/Neo-Psychedelia Backgrounds Vol.1/1.jpg') center/cover no-repeat;
+            filter: brightness(0.16) saturate(0.5);
+        }
+        .page-hero-content { position: relative; z-index: 1; }
+        .page-hero .hero-eyebrow { opacity: 1; animation: none; }
+        .page-hero h1 {
+            font-family: 'Commune', serif;
+            font-size: clamp(2.4rem, 5vw, 5rem);
+            color: var(--cream);
+            line-height: 1;
+            margin: 0.5rem 0 1rem;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg2);
+        }
+        .filter-btn {
+            font-family: 'Galdern', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: none;
+            border: 1px solid var(--border);
+            padding: 0.4rem 1rem;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            color: var(--bg);
+            background: var(--cyan);
+            border-color: var(--cyan);
+        }
+
+        /* Card grid */
+        .cards-section {
+            padding: 4rem 2rem;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+        .oracle-card-item {
+            cursor: pointer;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+        }
+        .oracle-card-item:hover {
+            transform: translateY(-4px);
+            border-color: var(--cyan);
+            box-shadow: 0 8px 32px rgba(94,232,232,0.1);
+        }
+        .oracle-card-item img {
+            width: 100%;
+            aspect-ratio: 3/5;
+            object-fit: contain;
+            display: block;
+            background: #000;
+        }
+        .oracle-card-label {
+            padding: 0.7rem;
+            text-align: center;
+        }
+        .oracle-card-label span {
+            font-family: 'CasualHuman', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--cream);
+            -webkit-text-stroke: 0.3px var(--cream);
+        }
+        .oracle-card-item.hidden { display: none; }
+
+        /* Modal */
+        .card-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .card-modal.open { display: flex; }
+        .card-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(2,12,16,0.92);
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+        }
+        .card-modal-box {
+            position: relative;
+            z-index: 1;
+            background: #030f14;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            max-width: 680px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 220px 1fr;
+        }
+        .card-modal-img {
+            width: 100%;
+            aspect-ratio: 3/5;
+            object-fit: contain;
+            background: #000;
+            border-radius: 7px 0 0 7px;
+        }
+        .card-modal-content {
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .card-modal-close:hover { color: var(--cyan); border-color: var(--cyan); }
+        .card-modal-name {
+            font-family: 'Commune', serif;
+            font-size: 2rem;
+            color: var(--cream);
+            margin-bottom: 0.3rem;
+            line-height: 1;
+        }
+        .card-modal-category {
+            font-family: 'Galdern', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 1.5rem;
+        }
+        .card-modal-divider {
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, var(--cyan), transparent);
+            margin-bottom: 1.5rem;
+        }
+        .card-modal-meaning {
+            font-family: 'Galdern', sans-serif;
+            font-size: 0.95rem;
+            color: var(--cream);
+            line-height: 1.9;
+            opacity: 0.85;
+            flex: 1;
+        }
+        .card-modal-prompt {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-family: 'Pleasurize', sans-serif;
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-style: italic;
+            line-height: 1.7;
+        }
+        @media (max-width: 600px) {
+            .card-modal-box { grid-template-columns: 1fr; }
+            .card-modal-img { aspect-ratio: 3/2; border-radius: 7px 7px 0 0; }
+        }
+    </style>
+</head>
+<body>
+    <nav id="nav">
+        <a href="index-v2.html" class="nav-logo">Vodouizan</a>
+        <ul class="nav-links">
+            <li><a href="services.html">Services</a></li>
+            <li><a href="oracle.html" style="color:var(--cyan);opacity:1">Oracle Deck</a></li>
+            <li><a href="zodiac.html">Zodiac</a></li>
+            <li><a href="index-v2.html#about">About</a></li>
+            <li><a href="index-v2.html#book" class="nav-cta">Book a Reading</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-hero">
+        <div class="page-hero-bg"></div>
+        <div class="page-hero-content">
+            <p class="hero-eyebrow">60 Original Cards</p>
+            <h1>Spirit Oracle Deck</h1>
+            <div class="divider" style="margin:1rem auto;"></div>
+            <p style="color:var(--muted);font-size:0.9rem;max-width:480px;margin:0 auto;">
+                60 hand-illustrated cards, each carrying a singular vibration. Click any card to reveal its meaning.
+            </p>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">All 60 Cards</button>
+        <button class="filter-btn" data-filter="inner">Inner World</button>
+        <button class="filter-btn" data-filter="spirit">Spirit &amp; Soul</button>
+        <button class="filter-btn" data-filter="action">Action &amp; Growth</button>
+        <button class="filter-btn" data-filter="connection">Connection</button>
+        <button class="filter-btn" data-filter="shadow">Shadow &amp; Challenge</button>
+    </div>
+
+    <div class="cards-section">
+        <div class="cards-grid" id="cardsGrid">
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Action"
+                data-meaning="Step forward. The time for deliberation has passed — decisive movement creates the change you seek. This card does not ask if you are ready. Readiness is a myth. The moment calls, and your answer is your power."
+                data-prompt="What is the one action you have been postponing that you already know you need to take?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_ACTION.jpg" alt="Action" />
+                <div class="oracle-card-label"><span>Action</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Ambience"
+                data-meaning="Your environment shapes your spirit in ways you cannot always articulate but will always feel. Sacred space calls for intentional creation. The energy of where you rest, work, and create is not neutral — it is either draining you or restoring you."
+                data-prompt="What does the space around you feel like right now? What one change would shift its energy?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_AMBIENCE.jpg" alt="Ambience" />
+                <div class="oracle-card-label"><span>Ambience</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Art"
+                data-meaning="Creative expression is not decoration — it is a channel for divine communication. Something within you seeks form. Honor the creator. The universe speaks through the hands that make things, through the voice that sings what words cannot carry."
+                data-prompt="What creative expression have you been suppressing? What would you make if no one would ever see it?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_ART.jpg" alt="Art" />
+                <div class="oracle-card-label"><span>Art</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Aura"
+                data-meaning="Your energetic field speaks before your words and remains after you leave the room. It is time to tend to it. Cleanse what has accumulated. Protect what is yours. Illuminate what you came here to radiate. You are not just a body — you are a field of living light."
+                data-prompt="Who or what has been leaving residue in your energetic field? What does protection look like for you right now?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_AURA.jpg" alt="Aura" />
+                <div class="oracle-card-label"><span>Aura</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Awareness"
+                data-meaning="A veil lifts. Something that has been obscured is becoming visible — in a relationship, within yourself, or in the situation surrounding you. Pay careful attention to what arrives in the next days. The information you need is already present."
+                data-prompt="What have you been sensing but not yet saying? What do you already know that you have been afraid to acknowledge?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_AWARENESS.jpg" alt="Awareness" />
+                <div class="oracle-card-label"><span>Awareness</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Balance"
+                data-meaning="The scales seek equilibrium. Something in your life has tipped too far in one direction and the body, the spirit, or the circumstances around you are sending signals. What must you release to restore peace? What must you embrace to feel whole?"
+                data-prompt="Where are you overextending? Where are you withholding from yourself what you freely give to others?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_BALANCE.jpg" alt="Balance" />
+                <div class="oracle-card-label"><span>Balance</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="shadow"
+                data-name="Challenge"
+                data-meaning="The obstacle before you is not punishment — it is curriculum. This difficulty was always going to find you because you are the one capable of navigating it. The challenge carries a seed of growth too specific to your nature to have been sent to anyone else."
+                data-prompt="What is this difficulty asking you to become? What would be possible on the other side of it?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_CHALLENGE.jpg" alt="Challenge" />
+                <div class="oracle-card-label"><span>Challenge</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="connection"
+                data-name="Communication"
+                data-meaning="Something must be spoken. Speak it from the deepest place available to you — not from reaction, not from performance, but from truth. At the same time, know that silence can be as powerful as speech. Listen before you respond."
+                data-prompt="What have you been withholding from someone who needs to hear it? What conversation are you avoiding?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_COMMUNICATION.jpg" alt="Communication" />
+                <div class="oracle-card-label"><span>Communication</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="connection"
+                data-name="Compassion"
+                data-meaning="Soften toward yourself and toward others. The judgment you are carrying — whether directed inward or outward — is costing you something precious. Understanding dissolves walls that argument never could. You do not have to agree with someone to extend them kindness."
+                data-prompt="Where are you being hard on yourself or another in a way that is not serving healing? What would compassion look like here?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_COMPASSION.jpg" alt="Compassion" />
+                <div class="oracle-card-label"><span>Compassion</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Concept"
+                data-meaning="A new idea is gestating within you — fragile and potent. It is not yet time to expose it to criticism or outside opinion. Nurture the vision in private before bringing it into the light. Not every seed should be planted in public soil."
+                data-prompt="What new idea or desire are you carrying that you have not yet shared with anyone? What does it need from you right now?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_CONCEPT.jpg" alt="Concept" />
+                <div class="oracle-card-label"><span>Concept</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="shadow"
+                data-name="Conflict"
+                data-meaning="Opposing forces create pressure that can forge extraordinary strength — if you do not collapse under it. There is something real at stake here. Stand in your truth, even if your voice shakes. Not all conflict can or should be avoided; some must be walked through."
+                data-prompt="Where is your truth in the midst of this tension? What are you refusing to say to keep the peace?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_CONFLICT.jpg" alt="Conflict" />
+                <div class="oracle-card-label"><span>Conflict</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Courage"
+                data-meaning="Fear is present. The call is still forward. The fact that you are afraid means this matters to you — and what matters to you is worth being afraid for. Your bravery does not need to look dramatic. Sometimes courage is just not turning back one more day."
+                data-prompt="What is one brave thing you could do today, even a small one? What would you do if you knew it was okay to be afraid while doing it?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_COURAGE.jpg" alt="Courage" />
+                <div class="oracle-card-label"><span>Courage</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Critique"
+                data-meaning="Honest reflection purifies intention. The feedback arriving — from another person, from circumstances, or from your own deeper knowing — is a gift, even when it arrives wrapped in discomfort. What in you needs to be refined rather than defended?"
+                data-prompt="What feedback have you received recently that you dismissed? What would change if you truly considered it?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_CRITIQUE.jpg" alt="Critique" />
+                <div class="oracle-card-label"><span>Critique</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Determination"
+                data-meaning="Persistence rewrites destiny. The path you are on requires more than inspiration — it requires the willingness to keep going when the inspiration has evaporated. Your resolve, maintained through the unglamorous middle, is your most powerful tool."
+                data-prompt="Where have you been showing up with half of yourself? What does full commitment look like in this area of your life?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_DETERMINATION.jpg" alt="Determination" />
+                <div class="oracle-card-label"><span>Determination</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Diligence"
+                data-meaning="The steady hand carves the deepest path. There is no shortcut available to you right now, and that is not a punishment — it is an invitation to develop a quality within you that only repetition can build. Small, consistent efforts compound into greatness that surprises even you."
+                data-prompt="What consistent practice, if you actually maintained it, would change everything? What prevents you from beginning today?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_DILIGENCE.jpg" alt="Diligence" />
+                <div class="oracle-card-label"><span>Diligence</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="connection"
+                data-name="Discourse"
+                data-meaning="Engage in dialogue with a genuinely open mind. You do not already know what this conversation will reveal. Truth often emerges not from one person's certainty but from the unexpected synthesis of two perspectives in honest exchange. Be willing to be changed by the talking."
+                data-prompt="Is there a conversation you have been avoiding because you are afraid of what it might shift in you?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_DISCOURSE.jpg" alt="Discourse" />
+                <div class="oracle-card-label"><span>Discourse</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="shadow"
+                data-name="Disillusion"
+                data-meaning="The dream or belief you have been carrying may not be yours to hold anymore. The disappointment of disillusionment is real — but beneath it is something far more valuable: the truth. Release creates the space that illusion was occupying. What becomes possible when you stop protecting a story that is no longer serving you?"
+                data-prompt="What belief or narrative are you holding onto that reality keeps contradicting? What are you afraid to see clearly?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_DISILLUSION.jpg" alt="Disillusion" />
+                <div class="oracle-card-label"><span>Disillusion</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Dream"
+                data-meaning="Your sleeping visions are not background noise — they are transmissions from your higher self and from the spirit world. The symbols, feelings, and images arising in your dreams right now carry messages worth attending to. Write them down. Sit with them."
+                data-prompt="What recurring dream, image, or feeling keeps returning to you? What might it be trying to tell you?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_DREAM.jpg" alt="Dream" />
+                <div class="oracle-card-label"><span>Dream</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="connection"
+                data-name="Embrace"
+                data-meaning="Welcome what arrives, even — especially — what is difficult. The tendency to resist what is uncomfortable prolongs the very suffering you are trying to avoid. This does not mean accepting harm. It means ceasing to fight against what already is, so you can engage with what is actually present."
+                data-prompt="What are you currently resisting that, if you stopped fighting it, might transform into something workable?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_EMBRACE.jpg" alt="Embrace" />
+                <div class="oracle-card-label"><span>Embrace</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Emotions"
+                data-meaning="Feelings are not weakness — they are wisdom encoded in a language older than thought. What you are feeling right now is information, not drama. Let the emotions move through you without drowning in them. Feel them fully, then allow them to pass. You are the river, not the water."
+                data-prompt="What emotion have you been avoiding or suppressing? What is it trying to tell you?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_EMOTIONS.jpg" alt="Emotions" />
+                <div class="oracle-card-label"><span>Emotions</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Energy"
+                data-meaning="Life force is present and available to you right now in unusual abundance. The question is where you will direct it. Energy follows intention. Unfocused, it dissipates. Directed with clarity and purpose, it becomes a force that moves things. Choose your focus deliberately."
+                data-prompt="What would you direct your full energy toward if you were not dividing it between things that drain you?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_ENERGY.jpg" alt="Energy" />
+                <div class="oracle-card-label"><span>Energy</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Enlighten"
+                data-meaning="Understanding is expanding beyond the bounds of your familiar mind. Something you thought you knew is revealing a deeper layer. This is not a comfortable process — illumination often reveals what we would rather not see alongside what we longed to find. Stay with it."
+                data-prompt="What understanding has been slowly dawning on you that your old beliefs haven't caught up with yet?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_ENLIGHTEN.jpg" alt="Enlighten" />
+                <div class="oracle-card-label"><span>Enlighten</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Environment"
+                data-meaning="The spaces you inhabit — physical, relational, digital, emotional — either drain you or restore you. This is not a neutral matter. Sacred ground must be chosen and protected with the same care you give to the people you love. Where do you need to be more intentional about where you spend your energy and time?"
+                data-prompt="Which environment in your life is consistently depleting you? What would a more intentional environment look like?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_ENVIRONMENT.jpg" alt="Environment" />
+                <div class="oracle-card-label"><span>Environment</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Eternal"
+                data-meaning="Beyond the physical, your soul is continuous. What seems like an ending carries within it a beginning that is not yet visible. Death is a door, not a wall. The grief you feel, the loss you carry — it is real, and it is not the end of the story."
+                data-prompt="What ending are you struggling to make peace with? What might be possible on the other side of releasing it?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_ETERNAL.jpg" alt="Eternal" />
+                <div class="oracle-card-label"><span>Eternal</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Faith"
+                data-meaning="Trust without evidence is the bravest act available to a human being. Something is asking you to release the need for certainty and move forward in the dark, trusting the ground beneath your feet even when you cannot see it. Surrender is not weakness. It is advanced trust."
+                data-prompt="What would you do, or accept, or release, if you genuinely trusted that things were unfolding correctly?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_FAITH.jpg" alt="Faith" />
+                <div class="oracle-card-label"><span>Faith</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="shadow"
+                data-name="Fear"
+                data-meaning="Examine what holds you frozen. The fear is real — you are not being asked to dismiss it. But the thing beneath the fear deserves examination. Most of the monsters that live in the dark of our imagination rarely survive an honest meeting in the light. What are you actually afraid of?"
+                data-prompt="Beneath the fear you are aware of, what is the deeper fear? What is the worst that could actually happen, and could you survive it?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_FEAR.jpg" alt="Fear" />
+                <div class="oracle-card-label"><span>Fear</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Freedom"
+                data-meaning="Liberation is available right now. The cage door is open. This is not a metaphor — something you believed was confining you is looser than you thought. Look again at what you have called impossible. The constraint may be internal rather than external, chosen rather than imposed."
+                data-prompt="Where in your life do you feel trapped? What if the lock were already open and you simply hadn't tried the door?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_FREEDOM.jpg" alt="Freedom" />
+                <div class="oracle-card-label"><span>Freedom</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Grace"
+                data-meaning="Move through difficulty with dignity. Elegance under pressure is a form of prayer — it says, I trust something larger than this moment, even when this moment is hard. You do not have to perform composure. But you can choose groundedness even when the ground is shaking."
+                data-prompt="How would your response to this situation change if you were acting from your highest self rather than your wound?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_GRACE.jpg" alt="Grace" />
+                <div class="oracle-card-label"><span>Grace</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Growth"
+                data-meaning="Expansion is sometimes profoundly uncomfortable. The stretching you feel right now is not a sign that something is wrong — it is evidence that you are alive and moving. Growth does not always feel like growth in the moment. Trust the process you cannot yet see the end of."
+                data-prompt="What area of your life is asking you to grow in a direction that scares you? What would be on the other side of that growth?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_GROWTH.jpg" alt="Growth" />
+                <div class="oracle-card-label"><span>Growth</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Happiness"
+                data-meaning="Joy is a practice, not a destination. It does not wait for conditions to be perfect. It lives in small and ordinary moments that you walk past in search of something larger. What ordinary pleasure have you been dismissing as not enough? Pleasure is not frivolous. It is fuel."
+                data-prompt="What small thing brought you genuine delight recently? What would it look like to pursue that deliberately?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_HAPPINESS.jpg" alt="Happiness" />
+                <div class="oracle-card-label"><span>Happiness</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Healing"
+                data-meaning="The wound that goes deepest often carries the medicine most needed by others. Your healing is not a detour from your purpose — it may be the very heart of it. Allow the process, even when it is slow. Even when it does not look like progress. The roots are forming underground."
+                data-prompt="What wound have you been trying to skip past rather than move through? What might be waiting for you on the other side?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_HEALING.jpg" alt="Healing" />
+                <div class="oracle-card-label"><span>Healing</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Health"
+                data-meaning="Honor the body as the sacred vessel it is. The physical is not separate from the spiritual — it is the temple through which spirit moves. What signals is your body sending right now that you have been dismissing? Rest is not laziness. Nourishment is not indulgence."
+                data-prompt="What is your body asking for that you have been denying it? What would it feel like to actually listen?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_HEALTH.jpg" alt="Health" />
+                <div class="oracle-card-label"><span>Health</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Hope"
+                data-meaning="Even in the darkest hour, the light persists. A candle cannot be unlit by the dark — darkness is simply the absence of light, not a force that overcomes it. The situation may look bleak. Something is still moving toward you. Stay present long enough to receive it."
+                data-prompt="What are you allowing yourself to hope for, even if you are afraid to say it aloud?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_HOPE.jpg" alt="Hope" />
+                <div class="oracle-card-label"><span>Hope</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Imagine"
+                data-meaning="Vision precedes reality without exception. What you can clearly imagine, you can build — but first, you must allow yourself to dream beyond what currently seems possible. The imagination is not escape; it is reconnaissance. What would you dare to envision if you knew it was achievable?"
+                data-prompt="What do you secretly dream about that you have stopped letting yourself want because it seems too large?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_IMAGINE.jpg" alt="Imagine" />
+                <div class="oracle-card-label"><span>Imagine</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Infinity"
+                data-meaning="Cycles within cycles. You are not stuck — you are spiraling. What feels like repetition may be a return at a higher level, like the same note played in a different octave. Look again at what you believe you have been through before. What is different this time?"
+                data-prompt="Where in your life does it feel like you are going in circles? What has actually changed since the last time you were here?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_INFINITY.jpg" alt="Infinity" />
+                <div class="oracle-card-label"><span>Infinity</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="connection"
+                data-name="Influence"
+                data-meaning="Your presence affects everything around you — far more than you realize. The energy you bring into a room, a relationship, or a project is not neutral. You are always influencing the field. The question is whether you are doing so with awareness. Wield your impact with intention."
+                data-prompt="What kind of energy do you most often bring into situations? Is it the energy you would choose if you were paying attention?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_INFLUENCE.jpg" alt="Influence" />
+                <div class="oracle-card-label"><span>Influence</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Inspiration"
+                data-meaning="Something greater is moving through you — a transmission seeking to land. Be still enough to receive it. Inspiration does not always announce itself loudly; sometimes it arrives as a quiet pull toward something you cannot explain. Follow the thread, even if you cannot see where it leads."
+                data-prompt="What has been calling to you lately that you have been too busy, too distracted, or too afraid to answer?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_INSPIRATION.jpg" alt="Inspiration" />
+                <div class="oracle-card-label"><span>Inspiration</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Intellect"
+                data-meaning="The mind is a powerful ally when aimed at the right questions. Study the situation before you with rigor and honesty. Your capacity to understand what is happening — to research, analyze, synthesize, and discern — is your superpower right now. Use it."
+                data-prompt="What would change in this situation if you approached it with curious analysis rather than emotional reaction?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_INTELLECT.jpg" alt="Intellect" />
+                <div class="oracle-card-label"><span>Intellect</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Journey"
+                data-meaning="The road itself is sacred — not only what waits at the destination. Where you are going matters, but who you become along the way matters infinitely more. This card asks you to be present to the travel, not just impatient for the arrival. Every step is also the destination."
+                data-prompt="What are you rushing toward that you might be missing the point of? What is the road itself teaching you right now?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_JOURNEY.jpg" alt="Journey" />
+                <div class="oracle-card-label"><span>Journey</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Joy"
+                data-meaning="Pure delight seeks expression through you right now. Let lightness find you — you do not have to earn it, achieve it, or deserve it. Joy is your birthright, not your reward. Something good is available. Are you letting yourself receive it, or are you still waiting until things are settled?"
+                data-prompt="What brings you genuine joy that you have been postponing until some future moment of permission?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_JOY.jpg" alt="Joy" />
+                <div class="oracle-card-label"><span>Joy</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Knowledge"
+                data-meaning="Wisdom accumulated through lived experience becomes a form of power unlike any other. What you have been through, survived, and learned is not wasted — it is the raw material of your authority. It is time to own what you know and share it with those who are coming up behind you."
+                data-prompt="What knowledge do you carry that you undervalue because you have always known it? Who in your life needs what you know?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_KNOWLEDGE.jpg" alt="Knowledge" />
+                <div class="oracle-card-label"><span>Knowledge</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="connection"
+                data-name="Love"
+                data-meaning="The highest vibration available to a human being. This card asks: what would this situation look like if you filtered it through unconditional love — for yourself, for another, for what is? Love is not naivety. It is the most powerful force in the universe, and it is available to you right now."
+                data-prompt="Where in your life are you withholding love — from yourself or from another — that you could offer freely?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_LOVE.jpg" alt="Love" />
+                <div class="oracle-card-label"><span>Love</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Meditation"
+                data-meaning="Stillness holds answers that motion cannot reach. The guidance you seek is not outside you — it is below the noise of your thoughts. Commit to the practice of silence, even imperfect silence, even briefly. The space between thoughts is where the real communication happens."
+                data-prompt="When did you last sit in genuine stillness? What arises when you stop filling the silence?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_MEDITATION.jpg" alt="Meditation" />
+                <div class="oracle-card-label"><span>Meditation</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Mind"
+                data-meaning="Thoughts become things — not metaphorically, but functionally. The story you tell yourself about what is possible, who you are, and what you deserve is actively writing your future. Monitor the internal dialogue. It is more powerful than anything happening outside you."
+                data-prompt="What is the dominant story your mind tells about this situation? Is it accurate? Is it kind? Is it serving you?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_MIND.jpg" alt="Mind" />
+                <div class="oracle-card-label"><span>Mind</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="shadow"
+                data-name="Noise"
+                data-meaning="External distraction and internal chatter are drowning out the signal you need to hear. The guidance is present but cannot land in a mind that is never quiet. Seek deliberate stillness. Turn inward. Not everything deserves your attention, and not everything that demands your attention deserves it."
+                data-prompt="What noise — internal or external — is preventing you from hearing your own clarity? What would you do if you turned it off?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_NOISE.jpg" alt="Noise" />
+                <div class="oracle-card-label"><span>Noise</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Passion"
+                data-meaning="Desire aligned with purpose burns clean. Follow what enlivens you without apology or explanation. The things that light you up are not accidents — they are signposts. Your passion is not self-indulgence; it is the universe pointing you toward your work."
+                data-prompt="What makes you feel most alive? Are you building a life that includes that, or always deferring it?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_PASSION.jpg" alt="Passion" />
+                <div class="oracle-card-label"><span>Passion</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Perception"
+                data-meaning="Reality is not fixed — it is shaped by the lens through which you look at it. A shift in perspective is available and it will shift everything. You are not required to see this situation the way you have always seen it. What would change if you looked through different eyes?"
+                data-prompt="What would this situation look like to someone who loved you deeply? To someone who had been through something harder? To your wisest future self?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_PERCEPTION.jpg" alt="Perception" />
+                <div class="oracle-card-label"><span>Perception</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Possibilities"
+                data-meaning="The field of potential is open wide before you, wider than the past would have you believe. You are not bound by what has happened before. The limitations you are working within may be more permeable than they appear. Do not let what was define what is possible."
+                data-prompt="What possibility are you refusing to consider because it seems too good, too far, or too different from what you know?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_POSSIBILITIES.jpg" alt="Possibilities" />
+                <div class="oracle-card-label"><span>Possibilities</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Profound"
+                data-meaning="Something deeper is calling you past the obvious, the surface, and the convenient. Resist the temptation of the easy answer. This situation has more to it than what appears. Dive beneath the literal. The meaning that matters is not on the surface."
+                data-prompt="What is the deeper layer of what is happening in your life right now that you have been reluctant to look at?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_PROFOUND.jpg" alt="Profound" />
+                <div class="oracle-card-label"><span>Profound</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Reflection"
+                data-meaning="The mirror of introspection shows what routine and habit conceal. It is time to look honestly — not harshly, but honestly — at where you are, how you got here, and what it would take to be somewhere different. Seeing clearly is the first act of change."
+                data-prompt="If you looked honestly at the pattern in this area of your life, what have you been unwilling to see?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_REFLECTION.jpg" alt="Reflection" />
+                <div class="oracle-card-label"><span>Reflection</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Rejoice"
+                data-meaning="Gratitude amplifies abundance — not as a spiritual transaction but as a fundamental shift in what you are able to see and receive. Celebrate what is working, even when much is hard. There is something real to be thankful for in this moment. Find it. Rest in it."
+                data-prompt="What is going well right now that you have been taking for granted? What would change if you genuinely celebrated it?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_REJOICE.jpg" alt="Rejoice" />
+                <div class="oracle-card-label"><span>Rejoice</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="connection"
+                data-name="Relationships"
+                data-meaning="Every connection in your life is a mirror and a teacher. The people who move you most deeply — in love, in friction, in longing — are reflecting something essential about you back to yourself. What is this relationship showing you? What does it ask you to grow into?"
+                data-prompt="What does the most significant relationship in your life right now reveal about who you are becoming?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_RELATIONSHIPS.jpg" alt="Relationships" />
+                <div class="oracle-card-label"><span>Relationships</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="connection"
+                data-name="Reunion"
+                data-meaning="What has been separated seeks wholeness. A reconciliation of some kind is near — with another person, with a part of yourself you have been estranged from, with a dream you set down. The distance between where you are and where you belong is closing."
+                data-prompt="What part of yourself, or which relationship, have you been separated from that is asking to be reclaimed?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_REUNION.jpg" alt="Reunion" />
+                <div class="oracle-card-label"><span>Reunion</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Serenity"
+                data-meaning="Peace is available to you even amid the chaos — not because the circumstances have changed, but because you are not the storm. You are the sky that contains it. Breathe. Drop into the part of you that has never been disturbed. It has always been there."
+                data-prompt="Where can you access stillness right now, even briefly? What does peace feel like in your body when you stop looking for it outside yourself?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_SERENITY.jpg" alt="Serenity" />
+                <div class="oracle-card-label"><span>Serenity</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Spirituality"
+                data-meaning="Your relationship with the divine is personal, valid, and deserving of cultivation. Whatever form your spiritual life takes — prayer, practice, nature, silence, service — deepen the conversation. You are not separate from what you seek. You are made of it."
+                data-prompt="How would you describe your spiritual life right now? What does it need from you?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_SPIRITUALITY.jpg" alt="Spirituality" />
+                <div class="oracle-card-label"><span>Spirituality</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Strength"
+                data-meaning="You are more capable than you currently believe yourself to be. The reservoir within you is deeper than what you have been drawing from. This card does not ask you to perform strength — it asks you to remember your own. You have been through things that should have broken you. You are still here."
+                data-prompt="What evidence do you have of your own resilience that you keep forgetting when you need it most?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_STRENGTH.jpg" alt="Strength" />
+                <div class="oracle-card-label"><span>Strength</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Transformation"
+                data-meaning="Something is dying so something else can be born. This is not tragedy — it is the most fundamental law of existence. You are in a chrysalis moment. What you are becoming cannot be carried in the form you currently hold. Surrender to the change you can already feel happening."
+                data-prompt="What are you being asked to let die? What might be trying to be born through you if you stopped resisting?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_TRANSFORMATION.jpg" alt="Transformation" />
+                <div class="oracle-card-label"><span>Transformation</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="inner"
+                data-name="Wisdom"
+                data-meaning="Knowledge becomes wisdom only when it is lived. The understanding you carry — not from books but from your own life — is now asking to be trusted. You already know what to do. The wisdom you seek is not outside you. It arrived the moment you survived what you survived."
+                data-prompt="If you trusted the deepest thing you already know in this situation, what would you do?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_WISDOM.jpg" alt="Wisdom" />
+                <div class="oracle-card-label"><span>Wisdom</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="spirit"
+                data-name="Wish"
+                data-meaning="Your heart's desire has been heard. Speak it clearly to the universe — not as a demand, but as a declaration. Something is listening. And then prepare yourself: wishes have a way of arriving in forms we did not expect, at moments we weren't ready for. Stay open to how this unfolds."
+                data-prompt="What do you most deeply wish for? Have you allowed yourself to want it fully, without negotiating it down to something safer?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_WISH.jpg" alt="Wish" />
+                <div class="oracle-card-label"><span>Wish</span></div>
+            </div>
+
+            <div class="oracle-card-item" data-category="action"
+                data-name="Work"
+                data-meaning="Sacred labor creates sacred results. Show up fully for the task before you — not just with your hands and your hours but with your full presence and intention. Work done with love is a form of prayer. The effort you put in right now is not wasted; it is the foundation."
+                data-prompt="Are you bringing your full self to the work in front of you? What would change if you treated your daily effort as sacred?">
+                <img src="illustrations/ORACLE_CARDS_JD/ORACLE_CARDS_WITH_TEXT/SC_CARD_WORK.jpg" alt="Work" />
+                <div class="oracle-card-label"><span>Work</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <section style="padding:5rem 0;text-align:center;background:var(--bg2);border-top:1px solid var(--border);">
+        <div class="container">
+            <p class="section-label">Let One Choose You</p>
+            <h2 class="section-title">Oracle Card Session</h2>
+            <div class="divider" style="margin:1.2rem auto;"></div>
+            <p style="color:var(--muted);max-width:500px;margin:0 auto 2rem;font-size:0.95rem;line-height:1.8;">
+                Experience a live oracle card reading with Joey — an intuitive draw tailored to your specific question or current life situation.
+            </p>
+            <a href="index-v2.html#book" class="btn-primary">Book an Oracle Session</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner">
+            <div>
+                <div class="footer-logo">Vodouizan</div>
+                <div class="footer-tagline">Psychic · Astrologer · Oracle Reader</div>
+            </div>
+            <ul class="footer-links">
+                <li><a href="services.html">Services</a></li>
+                <li><a href="oracle.html">Oracle Deck</a></li>
+                <li><a href="zodiac.html">Zodiac</a></li>
+                <li><a href="index-v2.html#about">About</a></li>
+                <li><a href="index-v2.html#book">Book</a></li>
+            </ul>
+            <div class="footer-copy">&copy; 2026 Joey. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <!-- Card Modal -->
+    <div class="card-modal" id="cardModal">
+        <div class="card-modal-backdrop" id="cardModalBackdrop"></div>
+        <div class="card-modal-box">
+            <img class="card-modal-img" id="cardModalImg" src="" alt="" />
+            <div class="card-modal-content">
+                <button class="card-modal-close" id="cardModalClose">&times;</button>
+                <div class="card-modal-name" id="cardModalName"></div>
+                <div class="card-modal-category" id="cardModalCategory"></div>
+                <div class="card-modal-divider"></div>
+                <div class="card-modal-meaning" id="cardModalMeaning"></div>
+                <div class="card-modal-prompt" id="cardModalPrompt"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Nav scroll
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 60);
+        });
+
+        // Filter
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const cards = document.querySelectorAll('.oracle-card-item');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.dataset.filter;
+                cards.forEach(card => {
+                    card.classList.toggle('hidden',
+                        filter !== 'all' && card.dataset.category !== filter
+                    );
+                });
+            });
+        });
+
+        // Modal
+        const modal = document.getElementById('cardModal');
+        const modalImg = document.getElementById('cardModalImg');
+        const modalName = document.getElementById('cardModalName');
+        const modalCategory = document.getElementById('cardModalCategory');
+        const modalMeaning = document.getElementById('cardModalMeaning');
+        const modalPrompt = document.getElementById('cardModalPrompt');
+
+        const categoryLabels = {
+            inner: 'Inner World',
+            spirit: 'Spirit & Soul',
+            action: 'Action & Growth',
+            connection: 'Connection',
+            shadow: 'Shadow & Challenge'
+        };
+
+        function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+
+        document.getElementById('cardModalClose').addEventListener('click', closeModal);
+        document.getElementById('cardModalBackdrop').addEventListener('click', closeModal);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                modalImg.src = card.querySelector('img').src;
+                modalImg.alt = card.dataset.name;
+                modalName.textContent = card.dataset.name;
+                modalCategory.textContent = categoryLabels[card.dataset.category] || card.dataset.category;
+                modalMeaning.textContent = card.dataset.meaning;
+                modalPrompt.textContent = '✦ ' + card.dataset.prompt;
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+    </script>
+</body>
+</html>

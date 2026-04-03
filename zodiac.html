@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zodiac Guide — J. Robicheaux</title>
+    <link rel="stylesheet" href="style-v2.css" />
+    <style>
+        .page-hero {
+            position: relative;
+            height: 38vh;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        .page-hero-bg {
+            position: absolute;
+            inset: 0;
+            background: url('backgrounds/Neo-Psychedelia Backgrounds Vol.1/7.jpg') center/cover no-repeat;
+            filter: brightness(0.16) saturate(0.5);
+        }
+        .page-hero-content { position: relative; z-index: 1; }
+        .page-hero .hero-eyebrow { opacity: 1; animation: none; }
+        .page-hero h1 {
+            font-family: 'Commune', serif;
+            font-size: clamp(2.4rem, 5vw, 5rem);
+            color: var(--cream);
+            line-height: 1;
+            margin: 0.5rem 0 1rem;
+        }
+
+        /* Sign nav strip */
+        .sign-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            padding: 2.5rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg2);
+        }
+        .sign-nav a {
+            font-family: 'CasualHuman', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            text-decoration: none;
+            text-transform: uppercase;
+            padding: 0.4rem 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .sign-nav a:hover { color: var(--cyan); border-color: var(--cyan); }
+
+        /* Sign sections */
+        .sign-section {
+            padding: 6rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .sign-section:nth-child(even) { background: var(--bg2); }
+        .sign-inner {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 5rem;
+            align-items: start;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .sign-left { text-align: center; }
+        .sign-symbol {
+            width: 110px;
+            height: 110px;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+            margin: 0 auto 1.5rem;
+            display: block;
+        }
+        .sign-planet-symbol {
+            width: 36px;
+            height: 36px;
+            filter: brightness(0) invert(1);
+            opacity: 0.5;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        .sign-name {
+            font-family: 'CasualHuman', sans-serif;
+            font-size: 2rem;
+            color: var(--cream);
+            letter-spacing: 0.05em;
+            -webkit-text-stroke: 0.5px var(--cream);
+            margin-bottom: 0.3rem;
+        }
+        .sign-dates {
+            font-family: 'Pleasurize', sans-serif;
+            font-size: 0.82rem;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            margin-bottom: 1.2rem;
+        }
+        .sign-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-top: 1rem;
+        }
+        .sign-meta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            gap: 1rem;
+        }
+        .sign-meta-label {
+            font-family: 'Galdern', sans-serif;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-size: 0.68rem;
+        }
+        .sign-meta-value {
+            font-family: 'CasualHuman', sans-serif;
+            color: var(--cream);
+            font-size: 0.78rem;
+        }
+
+        .sign-right h2 {
+            font-family: 'Commune', serif;
+            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+            color: var(--cream);
+            margin-bottom: 0.5rem;
+        }
+        .sign-right .divider { margin: 1rem 0 1.5rem; }
+        .sign-right p {
+            font-size: 0.97rem;
+            color: var(--muted);
+            line-height: 1.9;
+            margin-bottom: 1.2rem;
+        }
+        .sign-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.8rem;
+        }
+        .sign-column h4 {
+            font-family: 'CasualHuman', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 0.8rem;
+            -webkit-text-stroke: 0.3px var(--cyan);
+        }
+        .sign-column ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+        .sign-column ul li {
+            font-size: 0.86rem;
+            color: var(--cream);
+            opacity: 0.75;
+            display: flex;
+            gap: 0.6rem;
+            align-items: flex-start;
+        }
+        .sign-column ul li::before {
+            content: '·';
+            color: var(--cyan);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .sign-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+            .sign-columns { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav id="nav">
+        <a href="index-v2.html" class="nav-logo">Vodouizan</a>
+        <ul class="nav-links">
+            <li><a href="services.html">Services</a></li>
+            <li><a href="oracle.html">Oracle Deck</a></li>
+            <li><a href="zodiac.html" style="color:var(--cyan);opacity:1">Zodiac</a></li>
+            <li><a href="index-v2.html#about">About</a></li>
+            <li><a href="index-v2.html#book" class="nav-cta">Book a Reading</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-hero">
+        <div class="page-hero-bg"></div>
+        <div class="page-hero-content">
+            <p class="hero-eyebrow">The Cosmos</p>
+            <h1>Zodiac Guide</h1>
+            <div class="divider" style="margin:1rem auto;"></div>
+            <p style="color:var(--muted);font-size:0.9rem;max-width:480px;margin:0 auto;">
+                Twelve signs. Twelve archetypes. One cosmic story, told in the stars since before you were born.
+            </p>
+        </div>
+    </div>
+
+    <div class="sign-nav">
+        <a href="#aries">Aries</a><a href="#taurus">Taurus</a><a href="#gemini">Gemini</a>
+        <a href="#cancer">Cancer</a><a href="#leo">Leo</a><a href="#virgo">Virgo</a>
+        <a href="#libra">Libra</a><a href="#scorpio">Scorpio</a><a href="#sagittarius">Sagittarius</a>
+        <a href="#capricorn">Capricorn</a><a href="#aquarius">Aquarius</a><a href="#pisces">Pisces</a>
+    </div>
+
+    <!-- ARIES -->
+    <section class="sign-section" id="aries">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/aries.svg" alt="Aries" />
+                <div class="sign-name">Aries</div>
+                <div class="sign-dates">Mar 21 – Apr 19</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/mars-symbol.svg" alt="Mars" title="Mars" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Fire</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Cardinal</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Mars</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Leo, Sagittarius, Gemini</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Pioneer</h2>
+                <div class="divider"></div>
+                <p>Bold, driven, and fearless, Aries embodies the pure energy of beginnings. As the first sign of the zodiac, they carry within them the urgency of creation itself — charging forward where others hesitate, leading with instinct rather than calculation. Their courage is unmatched, their passion infectious, their impatience legendary.</p>
+                <p>At their best, Aries ignites change and pulls others into motion behind them. At their most challenged, they burn bridges before the fire cools. They do not wait for permission. They do not ask if it has been done before. They simply begin.</p>
+                <p>The Aries lesson is to channel that extraordinary fire with enough patience to see what it builds — rather than leaving a trail of brilliant sparks that never became a flame.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Leadership and initiative</li>
+                            <li>Courage under pressure</li>
+                            <li>Raw, honest passion</li>
+                            <li>Physical vitality</li>
+                            <li>Fearlessness</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Impulsiveness</li>
+                            <li>Short temper</li>
+                            <li>Selfishness in crisis</li>
+                            <li>Difficulty finishing</li>
+                            <li>Competitive at cost</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAURUS -->
+    <section class="sign-section" id="taurus">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/taurus.svg" alt="Taurus" />
+                <div class="sign-name">Taurus</div>
+                <div class="sign-dates">Apr 20 – May 20</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/venus-symbol.svg" alt="Venus" title="Venus" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Earth</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Fixed</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Venus</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Virgo, Capricorn, Cancer</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Cultivator</h2>
+                <div class="divider"></div>
+                <p>Taurus is the embodiment of earthy pleasure, steadfast loyalty, and the patient accumulation of beauty. Ruled by Venus, they are drawn to the sensory richness of life — fine food, deep comfort, art, music, and the smell of earth after rain. Where Aries rushes, Taurus plants.</p>
+                <p>Their determination is unshakeable — sometimes to a fault. They love deeply, protect fiercely, and build slowly with an eye for permanence. A Taurus home is always warm. A Taurus friend is always there.</p>
+                <p>The shadow of Taurus is the calcification of that beautiful steadiness into resistance. They must learn to distinguish between stability and stagnation — between loyalty and possession.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Patience and endurance</li>
+                            <li>Deep loyalty</li>
+                            <li>Sensuality and pleasure</li>
+                            <li>Practical reliability</li>
+                            <li>Artistic taste</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Stubbornness</li>
+                            <li>Possessiveness</li>
+                            <li>Resistance to change</li>
+                            <li>Over-indulgence</li>
+                            <li>Slow to forgive</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GEMINI -->
+    <section class="sign-section" id="gemini">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/gemini.svg" alt="Gemini" />
+                <div class="sign-name">Gemini</div>
+                <div class="sign-dates">May 21 – Jun 20</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/mercury.svg" alt="Mercury" title="Mercury" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Air</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Mutable</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Mercury</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Libra, Aquarius, Aries</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Twins</h2>
+                <div class="divider"></div>
+                <p>Gemini moves through the world as a kaleidoscope in motion — curious, communicative, and endlessly adaptable. The twins embody duality, the capacity to hold two truths at once, to see every angle of every argument, to be several things at the same time without contradiction.</p>
+                <p>Brilliant conversationalists and quick thinkers, Gemini shines in environments that reward flexibility and wit. Their mind is an extraordinary instrument, always gathering, synthesizing, and transmitting. They can talk to anyone. They genuinely want to.</p>
+                <p>The Gemini challenge is depth — the willingness to stay when the surface has been fully explored, to commit when curiosity still pulls elsewhere, to be fully present in one conversation when ten others beckon.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Intellectual curiosity</li>
+                            <li>Adaptability</li>
+                            <li>Sharp wit and humor</li>
+                            <li>Communication mastery</li>
+                            <li>Versatility</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Inconsistency</li>
+                            <li>Indecision</li>
+                            <li>Restlessness</li>
+                            <li>Superficiality</li>
+                            <li>Difficulty committing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CANCER -->
+    <section class="sign-section" id="cancer">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/cancer.svg" alt="Cancer" />
+                <div class="sign-name">Cancer</div>
+                <div class="sign-dates">Jun 21 – Jul 22</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/moon-symbol.svg" alt="Moon" title="Moon" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Water</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Cardinal</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Moon</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Scorpio, Pisces, Taurus</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Keeper</h2>
+                <div class="divider"></div>
+                <p>The most emotionally attuned sign in the zodiac, Cancer feels the world at a depth others rarely reach. Their psychic sensitivity and nurturing instincts make them natural healers, caregivers, and keepers of memory. Ruled by the Moon, they ebb and flow with their moods like the tides — and home is their most sacred temple.</p>
+                <p>Their love is fierce, protective, and sometimes suffocating. They remember everything — every kindness, every wound. Their shell is not weakness; it is wisdom. They know what the world can do, and they protect accordingly.</p>
+                <p>Cancer's path is to open the shell without losing the sensitivity that makes them extraordinary — to nurture others without neglecting the self, and to feel deeply without being swept away.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Deep empathy</li>
+                            <li>Powerful intuition</li>
+                            <li>Fierce loyalty</li>
+                            <li>Nurturing presence</li>
+                            <li>Emotional intelligence</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Moodiness</li>
+                            <li>Clinginess</li>
+                            <li>Defensiveness</li>
+                            <li>Difficulty releasing</li>
+                            <li>Emotional manipulation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LEO -->
+    <section class="sign-section" id="leo">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/leo.svg" alt="Leo" />
+                <div class="sign-name">Leo</div>
+                <div class="sign-dates">Jul 23 – Aug 22</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/sun-symbol.svg" alt="Sun" title="Sun" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Fire</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Fixed</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Sun</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Aries, Sagittarius, Libra</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Sovereign</h2>
+                <div class="divider"></div>
+                <p>Leo carries the sun within them — radiant, warm, and impossible to ignore. They are natural rulers who lead not through domination but through inspiration, generosity, and the sheer force of their presence. The room brightens when Leo enters. They cannot help it.</p>
+                <p>Creative, dramatic, and deeply loyal, Leo wants to love and be loved in equal measure. Their pride is their armor; their heart is their offering. They will give everything they have to those they claim as their own.</p>
+                <p>The shadow of Leo is the hunger for recognition that can tip into ego. When the light isn't reflected back, the lion can roar. The Leo lesson is to shine from the inside out — to give the performance for the love of the art, not the love of the applause.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Generosity of spirit</li>
+                            <li>Magnetic charisma</li>
+                            <li>Creative fire</li>
+                            <li>Unwavering loyalty</li>
+                            <li>Natural leadership</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Pride and ego</li>
+                            <li>Need for validation</li>
+                            <li>Dominance in relationships</li>
+                            <li>Dramatic reactions</li>
+                            <li>Difficulty sharing the stage</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIRGO -->
+    <section class="sign-section" id="virgo">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/virgo.svg" alt="Virgo" />
+                <div class="sign-name">Virgo</div>
+                <div class="sign-dates">Aug 23 – Sep 22</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/mercury.svg" alt="Mercury" title="Mercury" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Earth</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Mutable</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Mercury</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Taurus, Capricorn, Cancer</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Alchemist</h2>
+                <div class="divider"></div>
+                <p>Virgo sees what others miss. Analytical, precise, and quietly brilliant, they are the healers, editors, and servants of the zodiac — perpetually refining, improving, and perfecting both themselves and the world around them. Their gift is discernment; their burden is the relentless inner critic that applies those same exacting standards to themselves.</p>
+                <p>In service to others, Virgo finds meaning. They are the ones who show up with practical help when everyone else offers thoughts and prayers. They fix the thing. They make the plan. They keep going long after the dramatic have exhausted themselves.</p>
+                <p>The Virgo path is self-compassion — extending to themselves the grace and patience they freely offer to others, and trusting that imperfect action is still action.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Precision and analysis</li>
+                            <li>Service-oriented heart</li>
+                            <li>Intelligence and memory</li>
+                            <li>Reliability</li>
+                            <li>Healing instincts</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Self-criticism</li>
+                            <li>Anxiety</li>
+                            <li>Perfectionism</li>
+                            <li>Overthinking</li>
+                            <li>Difficulty receiving</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIBRA -->
+    <section class="sign-section" id="libra">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/libra.svg" alt="Libra" />
+                <div class="sign-name">Libra</div>
+                <div class="sign-dates">Sep 23 – Oct 22</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/venus-symbol.svg" alt="Venus" title="Venus" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Air</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Cardinal</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Venus</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Gemini, Aquarius, Leo</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Diplomat</h2>
+                <div class="divider"></div>
+                <p>The diplomat of the zodiac, Libra seeks harmony in all things — in relationships, in aesthetics, in the architecture of justice. Ruled by Venus, they are drawn to beauty, partnership, and fairness with an almost religious intensity. They see every side of every argument, which is both their greatest strength and their most paralyzing quality.</p>
+                <p>Libra's deepest longing is for balance — within and without — and they will sacrifice much to keep the peace. They are gifted at bringing people together, smoothing conflict, and finding the elegant middle path where others only see war.</p>
+                <p>The Libra challenge is the self. In tending so carefully to everyone else's needs and comfort, they can lose track of their own desires entirely. They must learn that their opinion matters, even when it disrupts the peace.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Diplomacy and tact</li>
+                            <li>Natural charm</li>
+                            <li>Sense of fairness</li>
+                            <li>Aesthetic sensibility</li>
+                            <li>Cooperative spirit</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Chronic indecision</li>
+                            <li>People-pleasing</li>
+                            <li>Conflict avoidance</li>
+                            <li>Self-sacrifice</li>
+                            <li>Superficiality under stress</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCORPIO -->
+    <section class="sign-section" id="scorpio">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/scorpio.svg" alt="Scorpio" />
+                <div class="sign-name">Scorpio</div>
+                <div class="sign-dates">Oct 23 – Nov 21</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/mars-symbol.svg" alt="Mars/Pluto" title="Pluto & Mars" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Water</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Fixed</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Pluto &amp; Mars</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Cancer, Pisces, Capricorn</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Transformer</h2>
+                <div class="divider"></div>
+                <p>Scorpio plunges to the depths no other sign will touch. Intense, magnetic, and fundamentally transformative, they see through pretense and seek truth at any cost. Their X-ray perception reads what lies beneath the surface of people, situations, and their own psyche with uncanny accuracy.</p>
+                <p>Their loyalty is unbreakable, their resentment long-lasting. Scorpio is the sign of death and rebirth — they understand, at a cellular level, that all true change requires something to die first. They are alchemists of the soul, drawn to the places where light and shadow meet.</p>
+                <p>The Scorpio path is learning to release control — to trust that the transformation they fear will not destroy them but reveal them. That vulnerability is not weakness but the doorway to the power they seek.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Depth and perception</li>
+                            <li>Magnetic intensity</li>
+                            <li>Unbreakable loyalty</li>
+                            <li>Transformative power</li>
+                            <li>Psychological insight</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Jealousy and control</li>
+                            <li>Secrecy</li>
+                            <li>Obsession</li>
+                            <li>Vengefulness</li>
+                            <li>Power struggles</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SAGITTARIUS -->
+    <section class="sign-section" id="sagittarius">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/sagittarius.svg" alt="Sagittarius" />
+                <div class="sign-name">Sagittarius</div>
+                <div class="sign-dates">Nov 22 – Dec 21</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/jupiter-symbol.svg" alt="Jupiter" title="Jupiter" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Fire</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Mutable</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Jupiter</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Aries, Leo, Aquarius</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Seeker</h2>
+                <div class="divider"></div>
+                <p>The archer of the zodiac, Sagittarius aims for the horizon — philosophically, physically, spiritually. Ruled by Jupiter, the planet of expansion and abundance, they are the most optimistic sign in the zodiac, approaching life as an infinite field of possibility and meaning to be explored.</p>
+                <p>They love freedom above all else and will flee anything that tries to contain them. Their bluntness is legend — they will tell you what they think, and they expect the same in return. Their laughter fills every room. Their enthusiasm is contagious. Their restlessness is a river that cannot be dammed.</p>
+                <p>The Sagittarius lesson is that commitment is not a cage — that depth does not diminish freedom but enriches it. They must learn to aim, not just draw the bow. To arrive, not just travel.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Optimism and vision</li>
+                            <li>Philosophical wisdom</li>
+                            <li>Freedom and adventure</li>
+                            <li>Humor and warmth</li>
+                            <li>Honesty</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Tactlessness</li>
+                            <li>Restlessness</li>
+                            <li>Commitment issues</li>
+                            <li>Overconfidence</li>
+                            <li>Following through</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CAPRICORN -->
+    <section class="sign-section" id="capricorn">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/capricorn.svg" alt="Capricorn" />
+                <div class="sign-name">Capricorn</div>
+                <div class="sign-dates">Dec 22 – Jan 19</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/saturn-symbol.svg" alt="Saturn" title="Saturn" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Earth</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Cardinal</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Saturn</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Taurus, Virgo, Scorpio</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Architect</h2>
+                <div class="divider"></div>
+                <p>The mountain goat ascends where others turn back. Capricorn is patient, disciplined, and deeply ambitious — playing the long game with masterful strategy and unrelenting focus. Ruled by Saturn, the great teacher, they carry a sense of responsibility from birth and an understanding that nothing of lasting value comes without effort.</p>
+                <p>They climb because the summit demands it. Because they cannot respect themselves if they do not try. Their ambition is not vanity — it is their expression of love for what is possible when a human being commits fully.</p>
+                <p>Beneath the stoic exterior lives a profound tenderness rarely seen by many and treasured by the few who reach it. The Capricorn lesson is warmth — to let people in before they have proven themselves worthy, and to rest before they have earned it.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Discipline and focus</li>
+                            <li>Strategic ambition</li>
+                            <li>Responsibility</li>
+                            <li>Dry wisdom and humor</li>
+                            <li>Long-game thinking</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Rigidity</li>
+                            <li>Workaholism</li>
+                            <li>Pessimism</li>
+                            <li>Emotional unavailability</li>
+                            <li>Status obsession</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AQUARIUS -->
+    <section class="sign-section" id="aquarius">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/aquarius.svg" alt="Aquarius" />
+                <div class="sign-name">Aquarius</div>
+                <div class="sign-dates">Jan 20 – Feb 18</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/uranus-symbol.svg" alt="Uranus" title="Uranus" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Air</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Fixed</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Uranus</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Gemini, Libra, Sagittarius</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Visionary</h2>
+                <div class="divider"></div>
+                <p>The visionary of the zodiac, Aquarius lives decades ahead of their time. Humanitarian, unconventional, and fiercely independent, they care deeply about the collective future of humanity while sometimes struggling with the intimacy of individual relationships. The paradox of Aquarius is loving all of humanity while having difficulty loving the one person in front of them.</p>
+                <p>Ruled by Uranus, the planet of disruption and innovation, they thrive on radical ideas, unexpected solutions, and the pleasure of being precisely wrong about everything predictable. They belong to the future. The present is just where they happen to be standing.</p>
+                <p>The Aquarius lesson is embodiment — to bring their extraordinary vision down from the stratosphere into the lived, messy, embodied experience of human connection. To let someone matter to them.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Innovation and vision</li>
+                            <li>Humanitarian ideals</li>
+                            <li>Independence</li>
+                            <li>Intellectual originality</li>
+                            <li>Community thinking</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Emotional detachment</li>
+                            <li>Stubbornness about ideas</li>
+                            <li>Aloofness</li>
+                            <li>Contrarianism</li>
+                            <li>Difficulty with intimacy</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PISCES -->
+    <section class="sign-section" id="pisces">
+        <div class="sign-inner">
+            <div class="sign-left">
+                <img class="sign-symbol" src="icons/zodiac-signs/pisces.svg" alt="Pisces" />
+                <div class="sign-name">Pisces</div>
+                <div class="sign-dates">Feb 19 – Mar 20</div>
+                <img class="sign-planet-symbol" src="icons/zodiac-signs/neptune-symbol.svg" alt="Neptune" title="Neptune" />
+                <div class="sign-meta">
+                    <div class="sign-meta-item"><span class="sign-meta-label">Element</span><span class="sign-meta-value">Water</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Mode</span><span class="sign-meta-value">Mutable</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Ruler</span><span class="sign-meta-value">Neptune</span></div>
+                    <div class="sign-meta-item"><span class="sign-meta-label">Compatible</span><span class="sign-meta-value">Cancer, Scorpio, Taurus</span></div>
+                </div>
+            </div>
+            <div class="sign-right">
+                <h2>The Mystic</h2>
+                <div class="divider"></div>
+                <p>The last sign holds all signs within it. Pisces is boundless — empathic to the point of dissolution, creative beyond measure, and spiritually porous in ways the other signs cannot access. Ruled by Neptune, planet of dreams, illusion, and transcendence, they live as much in the unseen world as the visible one.</p>
+                <p>They are the mystics, the artists, the dreamers, and the healers of the zodiac. Their compassion knows no limits and their imagination even fewer. Music moves through them. Suffering moves through them. Other people's pain moves through them. They feel it all, and they absorb it if they are not careful.</p>
+                <p>The Pisces path is boundaries — not walls, but membranes. The willingness to remain distinct while staying open. To serve without dissolving. To dream without escaping. To be of this world even while belonging, in some irreducible part, to another.</p>
+                <div class="sign-columns">
+                    <div class="sign-column">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Boundless empathy</li>
+                            <li>Creative imagination</li>
+                            <li>Spiritual sensitivity</li>
+                            <li>Compassion</li>
+                            <li>Psychic openness</li>
+                        </ul>
+                    </div>
+                    <div class="sign-column">
+                        <h4>Challenges</h4>
+                        <ul>
+                            <li>Escapism</li>
+                            <li>Martyrdom</li>
+                            <li>Weak boundaries</li>
+                            <li>Confusion and fog</li>
+                            <li>Self-deception</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="padding:5rem 0;text-align:center;background:var(--bg2);">
+        <div class="container">
+            <p class="section-label">Know Your Chart</p>
+            <h2 class="section-title">Ready to Go Deeper?</h2>
+            <div class="divider" style="margin:1.2rem auto;"></div>
+            <p style="color:var(--muted);max-width:500px;margin:0 auto 2rem;font-size:0.95rem;line-height:1.8;">
+                Your sun sign is just the beginning. A full natal chart reading reveals the complete picture — your rising sign, moon, and every planetary placement working together.
+            </p>
+            <a href="index-v2.html#book" class="btn-primary">Book an Astrology Reading</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner">
+            <div>
+                <div class="footer-logo">Vodouizan</div>
+                <div class="footer-tagline">Psychic · Astrologer · Oracle Reader</div>
+            </div>
+            <ul class="footer-links">
+                <li><a href="services.html">Services</a></li>
+                <li><a href="oracle.html">Oracle Deck</a></li>
+                <li><a href="zodiac.html">Zodiac</a></li>
+                <li><a href="index-v2.html#about">About</a></li>
+                <li><a href="index-v2.html#book">Book</a></li>
+            </ul>
+            <div class="footer-copy">&copy; 2026 Joey. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 60);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Environment & secrets
+.env
+.env.*
+*.key
+*.pem
+*.p12
+
+# Database
+*.sqlite
+*.db
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Node
+node_modules/
+
+# Zip files (already extracted)
+*.zip
