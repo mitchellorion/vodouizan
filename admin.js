@@ -1,6 +1,6 @@
 (() => {
   const SEQUENCE = 'abracadabra';
-  const PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
+  const PASSWORD_HASH = '2c0e7d9166f0a86639d5606f052289786184acbe8aeaed13473da59f948056fc';
 
   let typed = '';
 
