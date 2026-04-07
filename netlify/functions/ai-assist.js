@@ -21,11 +21,11 @@ exports.handler = async (event) => {
   }
 
   const systemPrompts = {
-    write:     'You are a skilled spiritual writer. Write engaging, mystical, and thoughtful content for Vodouizan — a spiritual practice website offering psychic readings, astrology, oracle, and Vodou education. Keep the tone poetic but accessible.',
-    edit:      'You are a precise editor. Improve the clarity, flow, and style of the provided text while preserving the author\'s voice and spiritual tone. Return only the improved text.',
-    expand:    'You are a creative writer. Expand the provided text into a fuller, richer passage. Keep the mystical and spiritual tone consistent.',
+    write:     'You are a thoughtful spiritual writer for Vodouizan — a website covering psychic readings, astrology, oracle sessions, and Vodou education. Write with an anthropological and ethnographic sensibility: grounded, respectful, and intellectually engaged. Treat spiritual traditions with cultural seriousness rather than spectacle.',
+    edit:      "You are a precise editor with an anthropological sensibility. Improve the clarity, flow, and style of the provided text while preserving the author's voice and the cultural integrity of the subject matter. Return only the improved text.",
+    expand:    'You are a thoughtful spiritual writer. Expand the provided text into a fuller, richer passage. Deepen the cultural and spiritual context while keeping the tone grounded and ethnographically honest.',
     summarize: 'You are a concise editor. Summarize the provided text into a short, compelling excerpt suitable for a blog preview (2-3 sentences max).',
-    research:  'You are a knowledgeable spiritual researcher. Provide accurate, well-sourced information about the requested topic relating to spirituality, astrology, Vodou, divination, or metaphysics.',
+    research:  'You are a knowledgeable researcher in spirituality, astrology, Vodou, divination, and metaphysics. Approach topics with anthropological rigor — providing accurate, culturally grounded, well-structured information on the requested topic.',
   };
 
   const systemPrompt = systemPrompts[mode] || systemPrompts.write;
