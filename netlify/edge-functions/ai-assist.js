@@ -72,7 +72,7 @@ export default async (request) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'kimi-k2.5',
+          model: 'moonshot-v1-32k',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt },
