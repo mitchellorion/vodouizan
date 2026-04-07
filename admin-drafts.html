@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Articles — Vodouizan Admin</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:      #020c10;
+      --bg2:     #040f15;
+      --bg3:     #071820;
+      --border:  #1a3a3a;
+      --cyan:    #5ee8e8;
+      --cyan-dk: #2ab8b8;
+      --text:    #d0e8e8;
+      --muted:   #4a6a6a;
+      --danger:  #e85e5e;
+      --gold:    #e8c45e;
+    }
+
+    html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1.5rem; background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    .back-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      color: var(--muted); text-decoration: none; font-size: 0.8rem;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--cyan); }
+    header h1 { font-size: 0.95rem; font-weight: 600; color: var(--cyan); }
+
+    .new-btn {
+      padding: 0.5rem 1.1rem; border-radius: 7px; font-size: 0.82rem;
+      font-weight: 600; cursor: pointer; border: none; font-family: inherit;
+      background: var(--cyan); color: var(--bg); transition: background 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .new-btn:hover { background: var(--cyan-dk); }
+
+    .main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    .filter-bar {
+      display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+    }
+    .filter-btn {
+      padding: 0.35rem 0.9rem; border-radius: 100px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); font-size: 0.78rem;
+      font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--cyan); color: var(--cyan); background: rgba(94,232,232,0.06); }
+
+    .article-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .article-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.1rem 1.25rem;
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: start; gap: 1rem;
+      transition: border-color 0.2s;
+    }
+    .article-card:hover { border-color: #2a5a5a; }
+    .article-card.published { border-left: 3px solid var(--cyan); }
+    .article-card.draft     { border-left: 3px solid #1a3a3a; }
+
+    .card-info { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+    .card-title {
+      font-size: 1rem; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-title.untitled { color: var(--muted); font-style: italic; }
+    .card-excerpt {
+      font-size: 0.8rem; color: var(--muted); line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-meta {
+      display: flex; align-items: center; gap: 0.75rem; margin-top: 0.2rem;
+    }
+    .status-badge {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 0.15rem 0.55rem; border-radius: 100px; border: 1px solid;
+    }
+    .status-badge.draft     { color: var(--muted); border-color: #1a3a3a; }
+    .status-badge.published { color: var(--cyan);  border-color: var(--cyan); background: rgba(94,232,232,0.06); }
+    .card-date { font-size: 0.72rem; color: var(--muted); }
+    .card-tags { font-size: 0.72rem; color: var(--muted); font-style: italic; }
+
+    .card-actions { display: flex; gap: 0.4rem; flex-shrink: 0; align-items: flex-start; margin-top: 0.1rem; }
+    .action-btn {
+      padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); font-size: 0.75rem;
+      font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .action-btn:hover         { border-color: var(--cyan); color: var(--cyan); }
+    .action-btn.publish-btn:hover  { border-color: var(--cyan); color: var(--cyan); }
+    .action-btn.unpublish-btn:hover{ border-color: var(--gold); color: var(--gold); }
+    .action-btn.delete-btn:hover   { border-color: var(--danger); color: var(--danger); }
+
+    .empty-state {
+      text-align: center; padding: 4rem 2rem; color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-state p { font-size: 0.9rem; margin-bottom: 1.25rem; }
+
+    #toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--bg2); border: 1px solid var(--cyan);
+      color: var(--cyan); padding: 0.6rem 1.25rem; border-radius: 8px;
+      font-size: 0.82rem; font-weight: 600; opacity: 0;
+      transition: opacity 0.3s; pointer-events: none; z-index: 9999;
+    }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <a href="#" onclick="history.back();return false;" class="back-btn">← Admin Panel</a>
+    <h1>Articles</h1>
+  </div>
+  <a href="admin-editor.html" class="new-btn">+ New Article</a>
+</header>
+
+<div class="main">
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="draft">Drafts</button>
+    <button class="filter-btn" data-filter="published">Published</button>
+  </div>
+
+  <div class="article-list" id="articleList"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const ARTICLES_KEY = 'vodouizan_articles';
+
+  function getArticles() {
+    try { return JSON.parse(localStorage.getItem(ARTICLES_KEY) || '[]'); } catch { return []; }
+  }
+  function saveArticles(arr) {
+    localStorage.setItem(ARTICLES_KEY, JSON.stringify(arr));
+  }
+
+  let currentFilter = 'all';
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      render();
+    });
+  });
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function stripHtml(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || '';
+  }
+
+  function render() {
+    const list = document.getElementById('articleList');
+    let articles = getArticles();
+
+    if (currentFilter !== 'all') {
+      articles = articles.filter(a => a.status === currentFilter);
+    }
+
+    if (articles.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">✍️</div>
+          <p>${currentFilter === 'all' ? 'No articles yet.' : `No ${currentFilter} articles.`}</p>
+          <a href="admin-editor.html" class="new-btn">Write your first article</a>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = articles.map(art => {
+      const title   = art.title?.trim() || '';
+      const excerpt = art.excerpt?.trim() || stripHtml(art.content || '').slice(0, 140);
+      const date    = art.status === 'published'
+        ? `Published ${formatDate(art.publishedAt)}`
+        : `Updated ${formatDate(art.updatedAt)}`;
+      const tags = art.tags?.trim();
+
+      return `
+        <div class="article-card ${art.status}" data-id="${art.id}">
+          <div class="card-info">
+            <div class="card-title ${title ? '' : 'untitled'}">${title || 'Untitled'}</div>
+            ${excerpt ? `<div class="card-excerpt">${excerpt}</div>` : ''}
+            <div class="card-meta">
+              <span class="status-badge ${art.status}">${art.status}</span>
+              <span class="card-date">${date}</span>
+              ${tags ? `<span class="card-tags">${tags}</span>` : ''}
+            </div>
+          </div>
+          <div class="card-actions">
+            <a href="admin-editor.html?id=${art.id}" class="action-btn">Edit</a>
+            ${art.status === 'draft'
+              ? `<button class="action-btn publish-btn" data-action="publish" data-id="${art.id}">Publish</button>`
+              : `<button class="action-btn unpublish-btn" data-action="unpublish" data-id="${art.id}">Unpublish</button>`
+            }
+            <button class="action-btn delete-btn" data-action="delete" data-id="${art.id}">Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Action handlers
+    list.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id     = btn.dataset.id;
+        const action = btn.dataset.action;
+
+        if (action === 'delete') {
+          if (!confirm('Delete this article? This cannot be undone.')) return;
+          saveArticles(getArticles().filter(a => a.id !== id));
+          showToast('Article deleted');
+          render();
+          return;
+        }
+
+        const articles = getArticles();
+        const art = articles.find(a => a.id === id);
+        if (!art) return;
+
+        const now = new Date().toISOString();
+        if (action === 'publish') {
+          art.status = 'published';
+          art.publishedAt = art.publishedAt || now;
+        } else {
+          art.status = 'draft';
+        }
+        art.updatedAt = now;
+        saveArticles(articles);
+        showToast(action === 'publish' ? 'Article published' : 'Moved to drafts');
+        render();
+      });
+    });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  render();
+</script>
+</body>
+</html>

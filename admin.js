@@ -127,20 +127,65 @@
     `;
     document.body.appendChild(overlay);
     const input = document.getElementById('admin-pass');
+    if (isLockedOut()) {
+      const until = new Date(parseInt(localStorage.getItem(LOCKOUT_KEY), 10));
+      document.getElementById('admin-error').textContent = `Too many attempts. Try again after ${until.toLocaleTimeString()}.`;
+      document.getElementById('admin-error').style.display = 'block';
+      document.getElementById('admin-login-btn').disabled = true;
+      input.disabled = true;
+    }
     input.focus();
     document.getElementById('admin-login-btn').addEventListener('click', attemptLogin);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
     document.getElementById('admin-close-login').addEventListener('click', closeLogin);
   }
 
+  const LOCKOUT_KEY  = '_adm_lk';
+  const ATTEMPTS_KEY = '_adm_at';
+  const MAX_ATTEMPTS = 5;
+  const LOCKOUT_MS   = 15 * 60 * 1000; // 15 minutes
+
+  function isLockedOut() {
+    const until = parseInt(localStorage.getItem(LOCKOUT_KEY) || '0', 10);
+    return Date.now() < until;
+  }
+
+  function recordFailedAttempt() {
+    const attempts = parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10) + 1;
+    localStorage.setItem(ATTEMPTS_KEY, attempts);
+    if (attempts >= MAX_ATTEMPTS) {
+      localStorage.setItem(LOCKOUT_KEY, Date.now() + LOCKOUT_MS);
+      localStorage.setItem(ATTEMPTS_KEY, '0');
+      return true; // just locked out
+    }
+    return false;
+  }
+
   async function attemptLogin() {
+    if (isLockedOut()) {
+      const until = new Date(parseInt(localStorage.getItem(LOCKOUT_KEY), 10));
+      const errEl = document.getElementById('admin-error');
+      errEl.textContent = `Too many attempts. Try again after ${until.toLocaleTimeString()}.`;
+      errEl.style.display = 'block';
+      return;
+    }
+
     const input = document.getElementById('admin-pass');
-    const hash = await sha256(input.value);
+    const hash  = await sha256(input.value);
     if (hash === PASSWORD_HASH) {
+      localStorage.setItem(ATTEMPTS_KEY, '0');
       closeLogin();
       showAdminPanel();
     } else {
-      document.getElementById('admin-error').style.display = 'block';
+      const lockedNow = recordFailedAttempt();
+      const errEl = document.getElementById('admin-error');
+      if (lockedNow) {
+        errEl.textContent = 'Too many failed attempts. Locked for 15 minutes.';
+      } else {
+        const left = MAX_ATTEMPTS - parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0', 10);
+        errEl.textContent = `Incorrect password. ${left} attempt${left !== 1 ? 's' : ''} remaining.`;
+      }
+      errEl.style.display = 'block';
       input.value = '';
       input.focus();
     }
@@ -163,6 +208,9 @@
           <div class="admin-links">
             <a class="admin-link highlight" href="admin-editor.html">
               <span class="icon">✍️</span> Build Article
+            </a>
+            <a class="admin-link" href="admin-drafts.html">
+              <span class="icon">📄</span> Articles
             </a>
           </div>
         </div>

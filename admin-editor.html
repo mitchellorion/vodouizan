@@ -317,13 +317,15 @@
   <!-- Header -->
   <header>
     <div class="header-left">
-      <a href="index.html" class="back-btn">← Back</a>
+      <a href="admin-drafts.html" class="back-btn">← Articles</a>
       <h1>Article Builder</h1>
+      <span id="articleStatusBadge" style="font-size:0.7rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:100px;border:1px solid #1a3a3a;color:#4a6a6a;text-transform:uppercase;letter-spacing:0.06em;">Draft</span>
     </div>
     <div class="header-actions">
       <button class="btn btn-ghost" id="saveDraftBtn">Save Draft</button>
       <button class="btn btn-ghost" id="previewBtn">Preview</button>
-      <button class="btn btn-primary" id="exportBtn">Export HTML</button>
+      <button class="btn btn-ghost" id="exportBtn">Export HTML</button>
+      <button class="btn btn-primary" id="publishBtn">Publish Article</button>
       <button class="btn btn-danger" id="clearBtn">Clear</button>
     </div>
   </header>
@@ -813,58 +815,106 @@
 
   fetchBalance(); // load on open
 
-  // ── Save Draft ───────────────────────────────────────────
-  function getDraft() {
-    return {
-      title:   titleEl.value,
-      excerpt: excerptEl.value,
-      tags:    tagsEl.value,
-      content: editor.innerHTML,
-      cover:   coverPreview.src || '',
-      saved:   new Date().toISOString(),
+  // ── Article Storage ──────────────────────────────────────
+  const ARTICLES_KEY = 'vodouizan_articles';
+
+  function getArticles() {
+    try { return JSON.parse(localStorage.getItem(ARTICLES_KEY) || '[]'); } catch { return []; }
+  }
+  function saveArticles(arr) {
+    localStorage.setItem(ARTICLES_KEY, JSON.stringify(arr));
+  }
+
+  const urlId = new URLSearchParams(location.search).get('id');
+  let currentArticleId = urlId || null;
+  let currentStatus = 'draft';
+
+  function updateStatusBadge(status) {
+    const badge = document.getElementById('articleStatusBadge');
+    badge.textContent = status === 'published' ? 'Published' : 'Draft';
+    badge.style.color = status === 'published' ? '#5ee8e8' : '#4a6a6a';
+    badge.style.borderColor = status === 'published' ? '#5ee8e8' : '#1a3a3a';
+  }
+
+  // Load article if editing existing one
+  if (currentArticleId) {
+    const art = getArticles().find(a => a.id === currentArticleId);
+    if (art) {
+      titleEl.value    = art.title   || '';
+      excerptEl.value  = art.excerpt || '';
+      tagsEl.value     = art.tags    || '';
+      editor.innerHTML = art.content || '';
+      currentStatus    = art.status  || 'draft';
+      updateStatusBadge(currentStatus);
+      if (art.cover) {
+        coverPreview.src = art.cover;
+        coverPreview.style.display = 'block';
+        coverRemove.style.display  = 'flex';
+        dropIcon.style.display  = 'none';
+        dropLabel.style.display = 'none';
+        dropSub.style.display   = 'none';
+      }
+    }
+  }
+
+  function saveArticle(status) {
+    const now      = new Date().toISOString();
+    const articles = getArticles();
+    const existing = currentArticleId ? articles.find(a => a.id === currentArticleId) : null;
+    const art = {
+      id:          currentArticleId || ('art_' + Date.now()),
+      title:       titleEl.value,
+      excerpt:     excerptEl.value,
+      tags:        tagsEl.value,
+      content:     editor.innerHTML,
+      cover:       coverPreview.src || '',
+      status,
+      createdAt:   existing?.createdAt || now,
+      updatedAt:   now,
+      publishedAt: status === 'published' ? (existing?.publishedAt || now) : (existing?.publishedAt || null),
     };
+
+    if (!currentArticleId) {
+      currentArticleId = art.id;
+      history.replaceState(null, '', `?id=${art.id}`);
+    }
+
+    const idx = articles.findIndex(a => a.id === art.id);
+    if (idx >= 0) articles[idx] = art; else articles.unshift(art);
+    saveArticles(articles);
+    currentStatus = status;
+    updateStatusBadge(status);
   }
 
   document.getElementById('saveDraftBtn').addEventListener('click', () => {
-    localStorage.setItem('vodouizan_article_draft', JSON.stringify(getDraft()));
+    saveArticle('draft');
     showToast('Draft saved');
+  });
+
+  document.getElementById('publishBtn').addEventListener('click', () => {
+    if (!titleEl.value.trim()) { showToast('Add a title before publishing'); return; }
+    saveArticle('published');
+    showToast('Article published');
   });
 
   // Auto-save every 60s
   setInterval(() => {
-    if (titleEl.value || editor.innerHTML) {
-      localStorage.setItem('vodouizan_article_draft', JSON.stringify(getDraft()));
-    }
+    if (titleEl.value || editor.innerHTML) saveArticle(currentStatus);
   }, 60000);
-
-  // Load draft on open
-  const saved = localStorage.getItem('vodouizan_article_draft');
-  if (saved) {
-    try {
-      const d = JSON.parse(saved);
-      titleEl.value   = d.title   || '';
-      excerptEl.value = d.excerpt || '';
-      tagsEl.value    = d.tags    || '';
-      editor.innerHTML = d.content || '';
-      if (d.cover) {
-        coverPreview.src = d.cover;
-        coverPreview.style.display = 'block';
-        coverRemove.style.display = 'flex';
-        dropIcon.style.display = 'none';
-        dropLabel.style.display = 'none';
-        dropSub.style.display = 'none';
-      }
-    } catch {}
-  }
 
   // ── Clear ────────────────────────────────────────────────
   document.getElementById('clearBtn').addEventListener('click', () => {
-    if (!confirm('Clear all content? This cannot be undone.')) return;
+    if (!confirm('Delete this article? This cannot be undone.')) return;
     titleEl.value = ''; excerptEl.value = ''; tagsEl.value = '';
     editor.innerHTML = '';
     coverRemove.click();
-    localStorage.removeItem('vodouizan_article_draft');
-    showToast('Cleared');
+    if (currentArticleId) {
+      saveArticles(getArticles().filter(a => a.id !== currentArticleId));
+      currentArticleId = null;
+      history.replaceState(null, '', 'admin-editor.html');
+      updateStatusBadge('draft');
+    }
+    showToast('Article deleted');
   });
 
   // ── Export HTML ──────────────────────────────────────────
