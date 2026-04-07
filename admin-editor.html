@@ -238,6 +238,25 @@
     .ai-insert-btn:hover { border-color: var(--cyan); color: var(--cyan); }
     .ai-insert-btn.visible { display: block; }
 
+    /* ── Selection toolbar ── */
+    #selectionToolbar {
+      position: fixed; z-index: 9998;
+      display: none; align-items: center; gap: 0.25rem;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.35rem 0.45rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      pointer-events: auto;
+    }
+    #selectionToolbar.visible { display: flex; }
+    .sel-tool-btn {
+      padding: 0.3rem 0.65rem; border-radius: 5px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); font-size: 0.73rem;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .sel-tool-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(94,232,232,0.07); }
+    .sel-tool-sep { width: 1px; background: var(--border); height: 18px; margin: 0 0.1rem; }
+
     /* ── Draft saved toast ── */
     #toast {
       position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
@@ -389,6 +408,15 @@
     </div>
 
   </div>
+</div>
+
+<!-- Selection Toolbar -->
+<div id="selectionToolbar">
+  <button class="sel-tool-btn" data-sel-mode="edit">✏️ Edit</button>
+  <div class="sel-tool-sep"></div>
+  <button class="sel-tool-btn" data-sel-mode="expand">📖 Expand</button>
+  <div class="sel-tool-sep"></div>
+  <button class="sel-tool-btn" data-sel-mode="summarize">📝 Summarize</button>
 </div>
 
 <!-- Link Modal -->
@@ -628,16 +656,82 @@
     }
   }
 
+  let selectionRangeForReplace = null; // saved range from selection toolbar
+
   document.getElementById('aiInsertBtn').addEventListener('click', () => {
     if (!lastAiResponse) return;
     editor.focus();
-    const sel = window.getSelection();
-    if (sel.rangeCount) {
-      const range = sel.getRangeAt(0);
-      range.collapse(false);
+    if (selectionRangeForReplace) {
+      // Replace the original selection
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(selectionRangeForReplace);
+      document.execCommand('insertText', false, lastAiResponse);
+      selectionRangeForReplace = null;
+      document.getElementById('aiInsertBtn').textContent = '↓ Insert into Editor';
+      showToast('Selection replaced');
+    } else {
+      // Append at cursor
+      const sel = window.getSelection();
+      if (sel.rangeCount) { const r = sel.getRangeAt(0); r.collapse(false); }
+      document.execCommand('insertText', false, '\n' + lastAiResponse);
+      showToast('Inserted into editor');
     }
-    document.execCommand('insertText', false, '\n' + lastAiResponse);
-    showToast('Inserted into editor');
+  });
+
+  // ── Selection Toolbar ────────────────────────────────────
+  const selToolbar = document.getElementById('selectionToolbar');
+
+  function hideSelToolbar() { selToolbar.classList.remove('visible'); }
+
+  editor.addEventListener('mouseup', positionSelToolbar);
+  editor.addEventListener('keyup',   positionSelToolbar);
+
+  function positionSelToolbar() {
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+    if (!text || !editor.contains(sel.anchorNode)) { hideSelToolbar(); return; }
+
+    selToolbar.classList.add('visible'); // must be visible to read dimensions
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    const tbW  = selToolbar.offsetWidth;
+    const tbH  = selToolbar.offsetHeight;
+    selToolbar.style.left = Math.max(8, rect.left + rect.width / 2 - tbW / 2) + 'px';
+    selToolbar.style.top  = (rect.top + window.scrollY - tbH - 10) + 'px';
+  }
+
+  document.addEventListener('mousedown', (e) => {
+    if (!selToolbar.contains(e.target)) hideSelToolbar();
+  });
+
+  selToolbar.addEventListener('mousedown', (e) => e.preventDefault()); // keep selection alive
+
+  selToolbar.querySelectorAll('[data-sel-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.selMode;
+      const sel  = window.getSelection();
+      const text = sel.toString().trim();
+      if (!text) return;
+
+      // Save range so we can replace after AI responds
+      selectionRangeForReplace = sel.getRangeAt(0).cloneRange();
+
+      // Switch sidebar to the right mode
+      document.querySelectorAll('.ai-mode-btn').forEach(b => b.classList.remove('active'));
+      const modeBtn = document.querySelector(`.ai-mode-btn[data-mode="${mode}"]`);
+      if (modeBtn) modeBtn.classList.add('active');
+      currentMode = mode;
+      document.getElementById('aiHint').textContent = `Mode: ${modeHints[mode]}`;
+
+      // Put selected text in prompt and fire
+      document.getElementById('aiPrompt').value = text;
+
+      // Update insert button label
+      document.getElementById('aiInsertBtn').textContent = '↩ Replace Selection';
+
+      hideSelToolbar();
+      sendAiRequest();
+    });
   });
 
   // ── Save Draft ───────────────────────────────────────────
