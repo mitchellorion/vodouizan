@@ -168,6 +168,29 @@
       padding: 0.15rem 0.5rem; border-radius: 100px; font-weight: 600;
     }
 
+    /* ── Credit meter ── */
+    .credit-meter {
+      padding: 0.6rem 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 0.3rem;
+    }
+    .credit-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.7rem;
+    }
+    .credit-label { color: var(--muted); }
+    .credit-value { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .credit-value.low { color: #e8a85e; }
+    .credit-value.empty { color: var(--danger); }
+    .credit-bar-wrap {
+      height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden;
+    }
+    .credit-bar {
+      height: 100%; border-radius: 2px; background: var(--cyan);
+      transition: width 0.4s ease;
+    }
+    .credit-bar.low { background: #e8a85e; }
+    .credit-bar.empty { background: var(--danger); }
+
     .ai-modes {
       display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;
       padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border);
@@ -374,6 +397,20 @@
     <div class="ai-col">
       <div class="ai-header">
         <h2>✦ AI Assistant <span class="ai-badge">Kimi</span></h2>
+      </div>
+
+      <div class="credit-meter" id="creditMeter">
+        <div class="credit-row">
+          <span class="credit-label">Credits remaining</span>
+          <span class="credit-value" id="creditValue">—</span>
+        </div>
+        <div class="credit-bar-wrap">
+          <div class="credit-bar" id="creditBar" style="width:0%"></div>
+        </div>
+        <div class="credit-row" style="margin-top:0.1rem">
+          <span class="credit-label" id="creditSub" style="font-size:0.65rem">Loading...</span>
+          <button style="font-size:0.65rem;background:none;border:none;color:var(--muted);cursor:pointer;padding:0;font-family:inherit;" onclick="fetchBalance()">↻ refresh</button>
+        </div>
       </div>
 
       <div class="ai-modes">
@@ -733,6 +770,45 @@
       sendAiRequest();
     });
   });
+
+  // ── Credit Meter ─────────────────────────────────────────
+  const CREDIT_MAX = 25; // ¥25 starting balance — adjust if you top up
+
+  async function fetchBalance() {
+    const valueEl = document.getElementById('creditValue');
+    const barEl   = document.getElementById('creditBar');
+    const subEl   = document.getElementById('creditSub');
+
+    subEl.textContent = 'Checking...';
+    try {
+      const res  = await fetch('/api/kimi-balance');
+      const json = await res.json();
+      const bal  = json?.data?.available_balance;
+
+      if (bal == null) {
+        valueEl.textContent = 'unavailable';
+        subEl.textContent   = 'Could not fetch balance';
+        return;
+      }
+
+      const pct   = Math.min(100, Math.max(0, (bal / CREDIT_MAX) * 100));
+      const isLow = pct < 20;
+      const isEmpty = pct < 5;
+
+      valueEl.textContent = `¥${bal.toFixed(2)}`;
+      valueEl.className   = 'credit-value' + (isEmpty ? ' empty' : isLow ? ' low' : '');
+      barEl.style.width   = pct + '%';
+      barEl.className     = 'credit-bar' + (isEmpty ? ' empty' : isLow ? ' low' : '');
+
+      const cash    = json.data.cash_balance?.toFixed(2);
+      const voucher = json.data.voucher_balance?.toFixed(2);
+      subEl.textContent = `¥${cash} cash · ¥${voucher} voucher`;
+    } catch {
+      subEl.textContent = 'Error fetching balance';
+    }
+  }
+
+  fetchBalance(); // load on open
 
   // ── Save Draft ───────────────────────────────────────────
   function getDraft() {
