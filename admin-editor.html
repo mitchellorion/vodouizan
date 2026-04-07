@@ -54,7 +54,19 @@
     .btn-danger:hover { border-color: var(--danger); color: var(--danger); }
 
     /* ── Main Grid ── */
-    .main { display: grid; grid-template-columns: 1fr 340px; height: 100%; overflow: hidden; }
+    .main { display: grid; grid-template-columns: 1fr 6px var(--ai-width, 340px); height: 100%; overflow: hidden; }
+
+    /* ── Resize Handle ── */
+    .resize-handle {
+      background: var(--border); cursor: col-resize; position: relative;
+      transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .resize-handle:hover, .resize-handle.dragging { background: var(--cyan); }
+    .resize-handle::after {
+      content: ''; width: 2px; height: 32px;
+      background: currentColor; border-radius: 2px; opacity: 0.4;
+    }
 
     /* ── Editor Column ── */
     .editor-col { display: flex; flex-direction: column; overflow-y: auto; padding: 2rem; gap: 1.25rem; }
@@ -335,7 +347,7 @@
   <div class="main">
 
     <!-- Editor Column -->
-    <div class="editor-col">
+    <div class="editor-col" id="editorCol">
 
       <!-- Title -->
       <div class="field-group">
@@ -396,6 +408,9 @@
       </div>
 
     </div>
+
+    <!-- Resize Handle -->
+    <div class="resize-handle" id="resizeHandle"></div>
 
     <!-- AI Sidebar -->
     <div class="ai-col">
@@ -986,6 +1001,41 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2200);
   }
+
+  // ── Panel resize ──
+  (function () {
+    const handle = document.getElementById('resizeHandle');
+    const main   = document.querySelector('.main');
+    const MIN_AI = 240;
+    const MAX_AI = 700;
+
+    let dragging = false;
+    let startX, startWidth;
+
+    handle.addEventListener('mousedown', (e) => {
+      dragging  = true;
+      startX    = e.clientX;
+      startWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ai-width') || '340', 10);
+      handle.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const delta  = startX - e.clientX; // drag left → ai gets bigger
+      const newWidth = Math.min(MAX_AI, Math.max(MIN_AI, startWidth + delta));
+      document.documentElement.style.setProperty('--ai-width', newWidth + 'px');
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  })();
 </script>
 </body>
 </html>
