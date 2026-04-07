@@ -553,38 +553,75 @@
     const prompt = document.getElementById('aiPrompt').value.trim();
     if (!prompt) return;
 
-    const sendBtn = document.getElementById('aiSendBtn');
+    const sendBtn    = document.getElementById('aiSendBtn');
     const responseEl = document.getElementById('aiResponse');
-    const insertBtn = document.getElementById('aiInsertBtn');
+    const insertBtn  = document.getElementById('aiInsertBtn');
 
     sendBtn.disabled = true;
-    sendBtn.textContent = 'Thinking...';
+    sendBtn.textContent = '✦ Thinking...';
     responseEl.className = 'ai-response loading';
-    responseEl.innerHTML = '<div class="ai-spinner"></div> Generating response...';
+    responseEl.innerHTML = '<div class="ai-spinner"></div> Connecting to Kimi...';
     insertBtn.classList.remove('visible');
     lastAiResponse = '';
 
     try {
-      const res = await fetch('/.netlify/functions/ai-assist', {
+      const res = await fetch('/api/ai-assist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, mode: currentMode }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
         responseEl.className = 'ai-response';
-        responseEl.textContent = `Error: ${data.error || 'Something went wrong.'}`;
-      } else {
-        lastAiResponse = data.result;
-        responseEl.className = 'ai-response';
-        responseEl.textContent = data.result;
-        insertBtn.classList.add('visible');
+        responseEl.textContent = `Error: ${err.error || res.statusText}`;
+        return;
       }
+
+      // Stream the response token by token
+      responseEl.className = 'ai-response';
+      responseEl.textContent = '';
+      sendBtn.textContent = '✦ Writing...';
+
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // keep incomplete line
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+          const data = trimmed.slice(5).trim();
+          if (data === '[DONE]') break;
+
+          try {
+            const parsed = JSON.parse(data);
+            const token = parsed.choices?.[0]?.delta?.content;
+            if (token) {
+              lastAiResponse += token;
+              responseEl.textContent = lastAiResponse;
+              responseEl.scrollTop = responseEl.scrollHeight;
+            }
+          } catch { /* skip malformed chunks */ }
+        }
+      }
+
+      if (lastAiResponse) {
+        insertBtn.classList.add('visible');
+      } else {
+        responseEl.textContent = 'No response received. Check your API key.';
+      }
+
     } catch (err) {
       responseEl.className = 'ai-response';
-      responseEl.textContent = 'Network error. Make sure KIMI_API_KEY is set in Netlify environment variables.';
+      responseEl.textContent = 'Network error — make sure you are on the live Netlify site and KIMI_API_KEY is set.';
     } finally {
       sendBtn.disabled = false;
       sendBtn.textContent = 'Generate →';
