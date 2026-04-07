@@ -1,18 +1,24 @@
 const SYSTEM_PROMPTS = {
   write:
-    'You are a skilled spiritual writer for Vodouizan — a website offering psychic readings, astrology, oracle sessions, and Vodou education. Write engaging, mystical, poetic content that is accessible and compelling. Use evocative language that honors the spiritual traditions.',
+    'You are a skilled spiritual writer for Vodouizan — a website offering psychic readings, astrology, oracle sessions, and Vodou education. Write engaging, mystical, poetic content that is accessible and compelling.',
   edit:
-    'You are a precise spiritual editor. Improve the clarity, flow, and style of the provided text while preserving the author\'s voice and spiritual tone. Return only the improved text with no commentary.',
+    "You are a precise spiritual editor. Improve the clarity, flow, and style of the provided text while preserving the author's voice and spiritual tone. Return only the improved text with no commentary.",
   expand:
-    'You are a creative spiritual writer. Expand the provided passage into a fuller, richer piece. Deepen the imagery, add context, and maintain the mystical tone throughout.',
+    'You are a creative spiritual writer. Expand the provided passage into a fuller, richer piece. Deepen the imagery and maintain the mystical tone.',
   summarize:
-    'You are a concise editor. Summarize the provided text into a compelling 2–3 sentence excerpt suitable for a blog preview. Keep the spiritual tone and make it enticing.',
+    'You are a concise editor. Summarize the provided text into a compelling 2-3 sentence excerpt suitable for a blog preview.',
   research:
-    'You are a knowledgeable researcher in spirituality, astrology, Vodou, divination, and metaphysics. Provide accurate, well-structured information on the requested topic. Be thorough but accessible.',
+    'You are a knowledgeable researcher in spirituality, astrology, Vodou, divination, and metaphysics. Provide accurate, well-structured information on the requested topic.',
 };
 
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  });
+}
+
 export default async (request) => {
-  // CORS preflight
   if (request.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -25,82 +31,70 @@ export default async (request) => {
   }
 
   if (request.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
+    return jsonResponse({ error: 'Method not allowed.' }, 405);
   }
 
-  const KIMI_API_KEY = Netlify.env.get('KIMI_API_KEY');
-  if (!KIMI_API_KEY) {
-    return new Response(
-      JSON.stringify({ error: 'API key not configured.' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-
-  let body;
   try {
-    body = await request.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ error: 'Invalid request body.' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+    const KIMI_API_KEY = Netlify.env.get('KIMI_API_KEY');
+    if (!KIMI_API_KEY) {
+      return jsonResponse({ error: 'KIMI_API_KEY not configured in Netlify environment variables.' }, 500);
+    }
 
-  const { prompt, mode } = body;
-  if (!prompt || typeof prompt !== 'string' || prompt.length > 6000) {
-    return new Response(
-      JSON.stringify({ error: 'Invalid prompt.' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON in request body.' }, 400);
+    }
 
-  const systemPrompt = SYSTEM_PROMPTS[mode] ?? SYSTEM_PROMPTS.write;
+    const { prompt, mode } = body;
+    if (!prompt || typeof prompt !== 'string' || prompt.length > 6000) {
+      return jsonResponse({ error: 'Invalid or missing prompt.' }, 400);
+    }
 
-  let kimiResponse;
-  try {
-    kimiResponse = await fetch('https://api.moonshot.cn/v1/chat/completions', {
-      method: 'POST',
+    const systemPrompt = SYSTEM_PROMPTS[mode] ?? SYSTEM_PROMPTS.write;
+
+    let kimiResponse;
+    try {
+      kimiResponse = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${KIMI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'moonshot-v1-32k',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt },
+          ],
+          stream: true,
+          max_tokens: 2048,
+          temperature: 0.72,
+        }),
+      });
+    } catch (fetchErr) {
+      return jsonResponse({ error: `Failed to reach Kimi API: ${fetchErr.message}` }, 502);
+    }
+
+    if (!kimiResponse.ok) {
+      const errText = await kimiResponse.text().catch(() => 'unknown');
+      return jsonResponse({ error: `Kimi API error ${kimiResponse.status}: ${errText}` }, 502);
+    }
+
+    return new Response(kimiResponse.body, {
+      status: 200,
       headers: {
-        Authorization: `Bearer ${KIMI_API_KEY}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'X-Accel-Buffering': 'no',
+        'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({
-        model: 'kimi-k2.5',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt },
-        ],
-        stream: true,
-        max_tokens: 2048,
-        temperature: 0.72,
-      }),
     });
+
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: 'Failed to reach Kimi API.' }),
-      { status: 502, headers: { 'Content-Type': 'application/json' } }
-    );
+    return jsonResponse({ error: `Edge function exception: ${err.message}` }, 500);
   }
-
-  if (!kimiResponse.ok) {
-    const errText = await kimiResponse.text();
-    console.error('Kimi API error:', errText);
-    return new Response(
-      JSON.stringify({ error: 'Kimi API returned an error.' }),
-      { status: 502, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-
-  // Stream the SSE response directly to the client
-  return new Response(kimiResponse.body, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'X-Accel-Buffering': 'no',
-      'Access-Control-Allow-Origin': '*',
-    },
-  });
 };
 
 export const config = { path: '/api/ai-assist' };
