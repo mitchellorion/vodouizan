@@ -65,14 +65,14 @@ export default async (request) => {
     let kimiResponse;
     try {
       console.log('[ai-assist] Calling Kimi API...');
-      kimiResponse = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+      kimiResponse = await fetch('https://api.moonshot.ai/v1/chat/completions', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${KIMI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'moonshot-v1-32k',
+          model: 'kimi-k2.5',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt },

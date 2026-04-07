@@ -31,14 +31,14 @@ exports.handler = async (event) => {
   const systemPrompt = systemPrompts[mode] || systemPrompts.write;
 
   try {
-    const response = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+    const response = await fetch('https://api.moonshot.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${KIMI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'moonshot-v1-32k',
+        model: 'kimi-k2.5',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt },
