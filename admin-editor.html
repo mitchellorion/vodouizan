@@ -120,27 +120,29 @@
     .toolbar-sep { width: 1px; background: var(--border); margin: 0 0.1rem; align-self: stretch; }
 
     .rich-editor {
-      background: var(--bg2); border: 1px solid var(--border); border-top: none;
-      border-radius: 0 0 8px 8px; padding: 1.25rem;
-      min-height: 320px; outline: none; line-height: 1.8;
-      color: var(--text); font-size: 0.95rem;
-      overflow-y: auto;
+      background: #050e16; border: 1px solid var(--border); border-top: none;
+      border-radius: 0 0 8px 8px; padding: 1.75rem 2rem;
+      min-height: 420px; outline: none; line-height: 1.9;
+      color: #e8f0f0; font-size: 1.05rem; letter-spacing: 0.01em;
+      overflow-y: auto; font-family: Georgia, 'Times New Roman', serif;
     }
     .rich-editor:empty::before {
       content: attr(data-placeholder);
-      color: var(--muted); pointer-events: none;
+      color: var(--muted); pointer-events: none; font-family: 'Inter', sans-serif;
     }
-    .rich-editor h1 { font-size: 1.6rem; margin: 1rem 0 0.5rem; color: #fff; }
-    .rich-editor h2 { font-size: 1.25rem; margin: 0.75rem 0 0.4rem; color: #fff; }
-    .rich-editor h3 { font-size: 1.05rem; margin: 0.6rem 0 0.3rem; color: var(--cyan); }
-    .rich-editor p { margin-bottom: 0.75rem; }
+    .rich-editor h1 { font-size: 1.85rem; margin: 1.25rem 0 0.6rem; color: #ffffff; font-family: 'Inter', sans-serif; font-weight: 700; line-height: 1.2; }
+    .rich-editor h2 { font-size: 1.4rem;  margin: 1rem 0 0.5rem;   color: #ffffff; font-family: 'Inter', sans-serif; font-weight: 600; line-height: 1.3; }
+    .rich-editor h3 { font-size: 1.15rem; margin: 0.85rem 0 0.4rem; color: var(--cyan); font-family: 'Inter', sans-serif; font-weight: 600; }
+    .rich-editor p { margin-bottom: 1rem; }
     .rich-editor blockquote {
-      border-left: 3px solid var(--cyan); padding-left: 1rem;
-      color: var(--muted); font-style: italic; margin: 0.75rem 0;
+      border-left: 3px solid var(--cyan); padding-left: 1.25rem;
+      color: #8ab0b0; font-style: italic; margin: 1.25rem 0;
     }
-    .rich-editor ul, .rich-editor ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    .rich-editor ul, .rich-editor ol { padding-left: 1.75rem; margin-bottom: 1rem; }
+    .rich-editor li { margin-bottom: 0.3rem; }
     .rich-editor a { color: var(--cyan); }
-    .rich-editor strong { color: #fff; }
+    .rich-editor strong { color: #ffffff; font-weight: 600; }
+    .rich-editor em { color: #c0dede; }
 
     /* ── Tags ── */
     .tags-input {
