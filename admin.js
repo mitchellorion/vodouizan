@@ -76,7 +76,7 @@
       .admin-section { margin-bottom: 2rem; }
       .admin-section h3 {
         font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
-        color: #7df4f4; margin: 0 0 0.75rem; opacity: 0.7;
+        color: #7df4f4; margin: 0 0 0.75rem;
       }
       .admin-links { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
       .admin-link {
