@@ -35,7 +35,7 @@
         box-shadow: 0 0 60px rgba(94,232,232,0.08);
         color: #e0e0e0;
       }
-      #admin-box h2 { margin: 0 0 0.25rem; font-size: 1.3rem; color: #7df4f4; }
+      #admin-box h2 { margin: 0 0 0.25rem; font-size: 1.3rem; color: #7df4f4; text-shadow: 0 0 12px rgba(255,255,255,0.35); }
       #admin-box p.sub { margin: 0 0 1.75rem; font-size: 0.8rem; color: #445; }
       #admin-box input[type="password"] {
         width: 100%; padding: 0.75rem 1rem; border-radius: 8px;
@@ -71,12 +71,12 @@
         box-shadow: 0 0 80px rgba(94,232,232,0.1);
         color: #e0e0e0;
       }
-      #admin-panel-box h2 { margin: 0 0 0.2rem; font-size: 1.25rem; color: #7df4f4; }
+      #admin-panel-box h2 { margin: 0 0 0.2rem; font-size: 1.25rem; color: #7df4f4; text-shadow: 0 0 12px rgba(255,255,255,0.35); }
       #admin-panel-box .panel-sub { font-size: 0.78rem; color: #334; margin: 0 0 2rem; }
       .admin-section { margin-bottom: 2rem; }
       .admin-section h3 {
         font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
-        color: #7df4f4; margin: 0 0 0.75rem;
+        color: #7df4f4; margin: 0 0 0.75rem; text-shadow: 0 0 8px rgba(255,255,255,0.4);
       }
       .admin-links { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
       .admin-link {
