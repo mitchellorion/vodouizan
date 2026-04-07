@@ -772,8 +772,6 @@
   });
 
   // ── Credit Meter ─────────────────────────────────────────
-  const CREDIT_MAX = 25; // ¥25 starting balance — adjust if you top up
-
   async function fetchBalance() {
     const valueEl = document.getElementById('creditValue');
     const barEl   = document.getElementById('creditBar');
@@ -791,8 +789,13 @@
         return;
       }
 
-      const pct   = Math.min(100, Math.max(0, (bal / CREDIT_MAX) * 100));
-      const isLow = pct < 20;
+      // Store the highest balance ever seen as the reference max
+      const storedMax = parseFloat(localStorage.getItem('kimi_balance_max') || '0');
+      const max = Math.max(storedMax, bal);
+      if (max > storedMax) localStorage.setItem('kimi_balance_max', max);
+
+      const pct     = Math.min(100, Math.max(0, (bal / max) * 100));
+      const isLow   = pct < 20;
       const isEmpty = pct < 5;
 
       valueEl.textContent = `¥${bal.toFixed(2)}`;
